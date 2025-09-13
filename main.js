@@ -12,9 +12,16 @@ import { auth, db } from './firebaseconfig.js';
 // ===== ESTADO GLOBAL DEL CARRITO =====
 let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
 let total = 0;
+let usuarioAutenticado = false;
 
 // ===== FUNCIONES DEL CARRITO (disponibles globalmente) =====
 window.agregarAlCarrito = function(producto, precio) {
+  // Verificar si el usuario está autenticado antes de agregar
+  if (!usuarioAutenticado) {
+    mostrarLoginMessage();
+    return;
+  }
+
   const existente = carrito.find(item => item.producto === producto);
   if (existente) {
     existente.cantidad++;
@@ -30,7 +37,7 @@ window.eliminarDelCarrito = function(index) {
   carrito.splice(index, 1);
   guardarCarrito();
   actualizarCarrito();
-  mostrarNotificacion(`🗑️ Producto eliminado`);
+  mostrarNotificacion(`🗑️ Producto eliminado del carrito`);
 };
 
 window.cambiarCantidad = function(index, cambio) {
@@ -58,14 +65,39 @@ function mostrarNotificacion(mensaje) {
   
   const notif = document.createElement('div');
   notif.className = 'notificacion';
-  notif.textContent = mensaje;
+  notif.innerHTML = `
+    <div class="notif-content">
+      <span class="notif-text">${mensaje}</span>
+    </div>
+  `;
   document.body.appendChild(notif);
   
+  // Auto-remover después de 4 segundos
   setTimeout(() => {
     if (notif.parentNode) {
-      notif.remove();
+      notif.style.animation = 'slideOutBounce 0.4s ease-in';
+      setTimeout(() => notif.remove(), 400);
     }
-  }, 3000);
+  }, 4000);
+}
+
+function mostrarLoginMessage() {
+  const loginMessage = document.getElementById("loginMessage");
+  if (loginMessage) {
+    loginMessage.style.display = "flex";
+    
+    // Auto-ocultar después de 5 segundos si se hace click fuera
+    const hideMessage = (e) => {
+      if (e.target === loginMessage) {
+        loginMessage.style.display = "none";
+        document.removeEventListener('click', hideMessage);
+      }
+    };
+    
+    setTimeout(() => {
+      document.addEventListener('click', hideMessage);
+    }, 100);
+  }
 }
 
 function mostrarCarritoVacio() {
@@ -75,7 +107,13 @@ function mostrarCarritoVacio() {
   const vaciarCarritoBtn = document.getElementById('vaciarCarrito');
   
   if (listaCarrito) {
-    listaCarrito.innerHTML = '<li class="vacio">Tu carrito está vacío</li>';
+    listaCarrito.innerHTML = `
+      <li class="carrito-vacio">
+        <div class="empty-cart-icon">🛒</div>
+        <p>Tu carrito está vacío</p>
+        <small>¡Agrega algunos de nuestros deliciosos cafés!</small>
+      </li>
+    `;
   }
   if (totalCarrito) {
     totalCarrito.textContent = 'Total: $0';
@@ -111,21 +149,31 @@ function actualizarCarrito() {
     total += subtotal;
 
     const li = document.createElement('li');
-    li.className = 'item-carrito';
+    li.className = 'carrito-item';
     li.innerHTML = `
-      <span class="nombre">${item.producto}</span>
-      <div class="controles-cantidad">
-        <button onclick="window.cambiarCantidad(${index}, -1)">-</button>
-        <span class="cantidad">x${item.cantidad}</span>
-        <button onclick="window.cambiarCantidad(${index}, 1)">+</button>
+      <div class="carrito-item-info">
+        <h4 class="carrito-item-nombre">${item.producto}</h4>
+        <div class="carrito-item-precio">$${item.precio.toLocaleString()} c/u</div>
       </div>
-      <span class="precio">$${subtotal.toLocaleString()}</span>
-      <button onclick="window.eliminarDelCarrito(${index})" class="eliminar-item">×</button>
+      <div class="carrito-item-controles">
+        <div class="controles-cantidad">
+          <button onclick="window.cambiarCantidad(${index}, -1)" class="btn-cantidad">-</button>
+          <span class="cantidad">×${item.cantidad}</span>
+          <button onclick="window.cambiarCantidad(${index}, 1)" class="btn-cantidad">+</button>
+        </div>
+        <div class="carrito-item-subtotal">$${subtotal.toLocaleString()}</div>
+        <button onclick="window.eliminarDelCarrito(${index})" class="btn-eliminar" title="Eliminar producto">×</button>
+      </div>
     `;
     listaCarrito.appendChild(li);
   });
 
-  totalCarrito.textContent = `Total: $${total.toLocaleString()}`;
+  totalCarrito.innerHTML = `
+    <div class="total-info">
+      <span class="total-label">Total:</span>
+      <span class="total-amount">${total.toLocaleString()}</span>
+    </div>
+  `;
   
   if (guardarPedidoBtn) guardarPedidoBtn.style.display = 'block';
   if (vaciarCarritoBtn) vaciarCarritoBtn.style.display = 'block';
@@ -145,7 +193,7 @@ async function cargarPedidos(uid) {
   if (!pedidosContainer) return; // Solo ejecutar en página de pedidos
   
   try {
-    console.log("📥 Cargando pedidos para usuario:", uid);
+    console.log("🔥 Cargando pedidos para usuario:", uid);
     
     const q = query(collection(db, "pedidos"), where("uid", "==", uid));
     const querySnapshot = await getDocs(q);
@@ -189,7 +237,8 @@ function mostrarSinPedidos() {
   
   pedidosContainer.innerHTML = `
     <div class="no-pedidos">
-      <h3>📦 No tienes pedidos aún</h3>
+      <div class="no-pedidos-icon">📦</div>
+      <h3>No tienes pedidos aún</h3>
       <p>¡Aún no has realizado ningún pedido! Ve a nuestra tienda y prueba nuestros deliciosos cafés especiales.</p>
       <a href="index.html" class="btn-primary">
         ☕ Ver productos
@@ -214,8 +263,8 @@ function mostrarPedidos(pedidos) {
 
     const productosHTML = pedido.pedido.map(producto => `
       <div class="producto-item">
-        <span class="producto-nombre">${producto.producto}</span>
-        <span class="producto-cantidad">x${producto.cantidad}</span>
+        <span class="producto-nombre">☕ ${producto.producto}</span>
+        <span class="producto-cantidad">×${producto.cantidad}</span>
       </div>
     `).join('');
 
@@ -223,7 +272,7 @@ function mostrarPedidos(pedidos) {
       <div class="pedido-card">
         <div class="pedido-header">
           <div class="pedido-id">
-            📋 Pedido ${pedido.id.substring(0, 8)}
+            📋 Pedido #${pedido.id.substring(0, 8)}
           </div>
           <div class="pedido-fecha">
             📅 ${fechaFormateada}
@@ -231,12 +280,22 @@ function mostrarPedidos(pedidos) {
         </div>
         
         <div class="pedido-total">
-          💰 Total: $${parseInt(pedido.total).toLocaleString()}
+          💰 Total: ${parseInt(pedido.total).toLocaleString()}
         </div>
         
         <div class="productos-list">
-          <h4>☕ Productos:</h4>
-          ${productosHTML}
+          <h4>📦 Productos:</h4>
+          <div class="productos-items">
+            ${productosHTML}
+          </div>
+        </div>
+        
+        <div class="pedido-status">
+          <span class="status-badge status-${pedido.estado || 'pendiente'}">
+            ${pedido.estado === 'completado' ? '✅ Completado' : 
+              pedido.estado === 'en-proceso' ? '⏳ En proceso' : 
+              '🟡 Pendiente'}
+          </span>
         </div>
       </div>
     `;
@@ -253,38 +312,93 @@ function mostrarPedidos(pedidos) {
 
 // ===== FUNCIONALIDAD DE FORMULARIO DE PEDIDO =====
 window.mostrarFormularioPedido = function() {
+  if (!usuarioAutenticado) {
+    mostrarNotificacion('❌ Debes iniciar sesión para realizar un pedido');
+    mostrarLoginMessage();
+    return;
+  }
+
   if (carrito.length === 0) {
-    alert("El carrito está vacío");
+    mostrarNotificacion("🛒 El carrito está vacío");
     return;
   }
 
   const overlay = document.createElement('div');
   overlay.className = 'form-overlay';
 
+  const resumenProductos = carrito.map(item => `
+    <div class="resumen-item">
+      <span>☕ ${item.producto} ×${item.cantidad}</span>
+      <span>${(item.precio * item.cantidad).toLocaleString()}</span>
+    </div>
+  `).join('');
+
   const formulario = document.createElement('div');
   formulario.className = 'form-container';
 
   formulario.innerHTML = `
     <h2>📋 Confirmar Pedido</h2>
+    
+    <div class="resumen-pedido">
+      <h3>📦 Resumen de tu pedido:</h3>
+      ${resumenProductos}
+      <div class="resumen-total">
+        <strong>Total: ${total.toLocaleString()}</strong>
+      </div>
+    </div>
+
     <form id="formPedido">
-      <!-- Campos del formulario -->
-      <button type="submit">✅ Confirmar Pedido</button>
+      <h3>📍 Información de entrega:</h3>
+      
+      <input type="text" id="nombreCliente" placeholder="Nombre completo *" required>
+      <input type="tel" id="telefonoCliente" placeholder="Teléfono *" required>
+      <input type="text" id="direccionCliente" placeholder="Dirección completa *" required>
+      <textarea id="observaciones" placeholder="Observaciones adicionales (opcional)" rows="3"></textarea>
+      
+      <div class="form-buttons">
+        <button type="button" id="cancelarPedido">❌ Cancelar</button>
+        <button type="submit">✅ Confirmar Pedido</button>
+      </div>
     </form>
   `;
 
   overlay.appendChild(formulario);
   document.body.appendChild(overlay);
 
-  // Manejar envío del formulario
-  formulario.querySelector('form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    // Lógica para guardar pedido en Firebase
-    await guardarPedidoFirebase();
+  // Manejar cancelación
+  formulario.querySelector('#cancelarPedido').addEventListener('click', () => {
     overlay.remove();
-    carrito = [];
-    guardarCarrito();
-    actualizarCarrito();
-    mostrarNotificacion('🎉 Pedido confirmado exitosamente');
+  });
+
+  // Manejar envío del formulario
+  formulario.querySelector('#formPedido').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = '⏳ Procesando...';
+    submitBtn.disabled = true;
+    
+    try {
+      await guardarPedidoFirebase();
+      overlay.remove();
+      carrito = [];
+      guardarCarrito();
+      actualizarCarrito();
+      mostrarNotificacion('🎉 ¡Pedido confirmado exitosamente!');
+    } catch (error) {
+      console.error('Error al guardar pedido:', error);
+      mostrarNotificacion('❌ Error al procesar el pedido. Inténtalo de nuevo.');
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+
+  // Cerrar con click fuera del formulario
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.remove();
+    }
   });
 };
 
@@ -292,9 +406,24 @@ async function guardarPedidoFirebase() {
   const user = auth.currentUser;
   if (!user) throw new Error('Usuario no autenticado');
 
+  const nombre = document.getElementById('nombreCliente').value.trim();
+  const telefono = document.getElementById('telefonoCliente').value.trim();
+  const direccion = document.getElementById('direccionCliente').value.trim();
+  const observaciones = document.getElementById('observaciones').value.trim();
+
+  if (!nombre || !telefono || !direccion) {
+    throw new Error('Por favor completa todos los campos obligatorios');
+  }
+
   const pedidoData = {
     uid: user.uid,
     email: user.email,
+    cliente: {
+      nombre,
+      telefono,
+      direccion,
+      observaciones
+    },
     pedido: carrito,
     total: total,
     fecha: new Date().toISOString(),
@@ -317,9 +446,6 @@ function configurarInterfaz() {
   const cerrarCarrito = document.getElementById('cerrarCarrito');
   const authBtn = document.getElementById('authBtn');
   const authMobileBtn = document.getElementById('authMobileBtn');
-  const userWelcome = document.getElementById("userWelcome");
-  const userName = document.getElementById("userName");
-  const loginMessage = document.getElementById("loginMessage");
   const vaciarCarritoBtn = document.getElementById('vaciarCarrito');
   const guardarPedidoBtn = document.getElementById('guardarPedido');
   const addToCartButtons = document.querySelectorAll(".add-to-cart-btn");
@@ -376,11 +502,16 @@ function configurarInterfaz() {
   // Vaciar carrito
   if (vaciarCarritoBtn) {
     vaciarCarritoBtn.addEventListener('click', () => {
-      if (confirm('¿Vaciar carrito?')) {
+      if (carrito.length === 0) {
+        mostrarNotificacion('🛒 El carrito ya está vacío');
+        return;
+      }
+      
+      if (confirm('¿Estás seguro de que deseas vaciar el carrito?')) {
         carrito = [];
         guardarCarrito();
         actualizarCarrito();
-        mostrarNotificacion('🗑️ Carrito vaciado');
+        mostrarNotificacion('🗑️ Carrito vaciado exitosamente');
       }
     });
   }
@@ -400,11 +531,13 @@ function configurarInterfaz() {
 
   setInterval(syncAuthButtons, 100);
 
-  // Botones añadir al carrito
+  // Botones añadir al carrito - NO verificar autenticación aquí
   if (addToCartButtons.length > 0) {
     addToCartButtons.forEach(button => {
       const producto = button.dataset.producto;
       const precio = parseInt(button.dataset.precio);
+      
+      // No deshabilitar botones basado en autenticación
       button.onclick = () => window.agregarAlCarrito(producto, precio);
     });
   }
@@ -417,11 +550,12 @@ function configurarAutenticacion() {
   const userWelcome = document.getElementById("userWelcome");
   const userName = document.getElementById("userName");
   const loginMessage = document.getElementById("loginMessage");
-  const addToCartButtons = document.querySelectorAll(".add-to-cart-btn");
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       // Usuario autenticado
+      usuarioAutenticado = true;
+      
       if (userName) userName.textContent = user.displayName || user.email.split('@')[0];
       if (userWelcome) userWelcome.style.display = "block";
 
@@ -432,9 +566,10 @@ function configurarAutenticacion() {
       const logoutFunction = async () => {
         try {
           await signOut(auth);
-          alert("👋 Sesión cerrada correctamente");
+          mostrarNotificacion("👋 Sesión cerrada correctamente");
         } catch (error) {
           console.error(error);
+          mostrarNotificacion("❌ Error al cerrar sesión");
         }
       };
 
@@ -447,6 +582,8 @@ function configurarAutenticacion() {
       await cargarPedidos(user.uid);
     } else {
       // Usuario no autenticado
+      usuarioAutenticado = false;
+      
       if (userWelcome) userWelcome.style.display = "none";
 
       const loginText = "🔑 Iniciar Sesión";
@@ -460,7 +597,8 @@ function configurarAutenticacion() {
       if (authBtn) authBtn.onclick = loginFunction;
       if (authMobileBtn) authMobileBtn.onclick = loginFunction;
 
-      if (loginMessage) loginMessage.style.display = "block";
+      // No mostrar automáticamente el mensaje de login
+      // Solo se mostrará cuando intenten agregar al carrito
     }
   });
 }
