@@ -1,0 +1,12 @@
+# Variables de entorno
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+#archivos importantes
+firebaseconfig.js
+
+# Dependencias
+node_modules/

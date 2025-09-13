@@ -1,0 +1,90 @@
+/* Overlay formulario */
+.form-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 4000;
+}
+
+/* Contenedor del formulario */
+.form-container {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+/* Resumen del pedido */
+.resumen-pedido {
+  background: #fff8e1;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+.resumen-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+/* Inputs y textareas */
+form input, form textarea {
+  width: 100%;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+form input:focus, form textarea:focus {
+  border-color: #ffd700;
+  background: #fff;
+  outline: none;
+}
+
+/* Botones */
+.form-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-buttons button {
+  flex: 1;
+  padding: 1rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+#cancelarPedido {
+  background: white;
+  border: 2px solid #ef4444;
+  color: #ef4444;
+}
+
+#cancelarPedido:hover {
+  background: #ef4444;
+  color: white;
+}
+
+form button[type="submit"] {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+}
+
+form button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
