@@ -7,32 +7,52 @@
   <link rel="stylesheet" href="auth.css">
   
   <!-- Importamos el JS con defer -->
-<script src="auth.js" type="module"></script>
-
+  <script src="auth.js" type="module"></script>
 </head>
 <body>
   <div class="auth-container">
     <h1>☕ Café Valdore</h1>
     
     <div id="errorMsg" class="error" style="display: none;"></div>
+    <div id="successMsg" class="success" style="display: none;"></div>
     
     <!-- Formulario de Login -->
-    <div id="loginForm" class="auth-form">
+    <div id="loginForm" class="auth-form active">
       <h2>Iniciar Sesión</h2>
       <input type="email" id="loginEmail" placeholder="Correo electrónico" required>
       <input type="password" id="loginPassword" placeholder="Contraseña" required>
       <button id="loginBtn">Iniciar Sesión</button>
-      <button type="button" class="toggle-btn" onclick="toggleForm()">¿No tienes cuenta? Regístrate</button>
+      <button type="button" class="toggle-btn" onclick="toggleForm('register')">¿No tienes cuenta? Regístrate</button>
+      <button type="button" class="toggle-btn" onclick="toggleForm('forgot')">¿Olvidaste tu contraseña?</button>
     </div>
 
     <!-- Formulario de Registro -->
-    <div id="registerForm" class="auth-form" style="display: none;">
+    <div id="registerForm" class="auth-form">
       <h2>Registrarse</h2>
       <input type="text" id="registerName" placeholder="Nombre completo" required>
       <input type="email" id="registerEmail" placeholder="Correo electrónico" required>
       <input type="password" id="registerPassword" placeholder="Contraseña (mín. 6 caracteres)" required>
       <button id="registerBtn">Crear Cuenta</button>
-      <button type="button" class="toggle-btn" onclick="toggleForm()">¿Ya tienes cuenta? Inicia sesión</button>
+      <button type="button" class="toggle-btn" onclick="toggleForm('login')">¿Ya tienes cuenta? Inicia sesión</button>
+    </div>
+
+    <!-- Formulario de Recuperación de Contraseña -->
+    <div id="forgotForm" class="auth-form">
+      <h2>Recuperar Contraseña</h2>
+      <p>Ingresa tu correo electrónico para recibir un enlace de restablecimiento</p>
+      <input type="email" id="forgotEmail" placeholder="Correo electrónico" required>
+      <button id="sendResetBtn">Enviar Enlace</button>
+      <button type="button" class="toggle-btn" onclick="toggleForm('login')">Volver al Inicio de Sesión</button>
+    </div>
+
+    <!-- Formulario de Cambio de Contraseña (solo para usuarios autenticados) -->
+    <div id="changePassForm" class="auth-form">
+      <h2>Cambiar Contraseña</h2>
+      <input type="password" id="currentPassword" placeholder="Contraseña actual" required>
+      <input type="password" id="newPassword" placeholder="Nueva contraseña" required>
+      <input type="password" id="confirmPassword" placeholder="Confirmar nueva contraseña" required>
+      <button id="changePassBtn">Cambiar Contraseña</button>
+      <button type="button" class="toggle-btn" onclick="toggleForm('login')">Cancelar</button>
     </div>
 
     <a href="index.html" class="back-link">← Volver a la tienda</a>

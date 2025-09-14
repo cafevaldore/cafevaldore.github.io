@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración - Café Valdore</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <!-- Header con menú responsive -->
+  <header>
+    <nav>
+      <a href="index.html" class="logo">☕ Café Valdore</a>
+      
+      <!-- Menú desktop -->
+      <ul class="nav-links">
+        <li><a href="index.html">🏠 Inicio</a></li>
+        <li><a href="admin.html" class="active">⚙️ Administración</a></li>
+        <li><button id="authBtn" class="auth-btn">🚪 Cerrar Sesión</button></li>
+      </ul>
+
+      <!-- Botón hamburguesa -->
+      <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </nav>
+
+    <!-- Menú móvil -->
+    <div class="mobile-menu" id="mobileMenu">
+      <ul>
+        <li><a href="index.html">🏠 Inicio</a></li>
+        <li><a href="admin.html" class="active">⚙️ Administración</a></li>
+        <li><button id="authMobileBtn" class="auth-btn">🚪 Cerrar Sesión</button></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="admin-container">
+    <div class="admin-header">
+      <h1>⚙️ Panel de Administración</h1>
+      <p>Gestiona pedidos y mensajes de contacto</p>
+    </div>
+
+    <div class="admin-stats">
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-info">
+          <h3 id="totalPedidos">0</h3>
+          <p>Pedidos Totales</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-info">
+          <h3 id="pedidosPendientes">0</h3>
+          <p>Pendientes</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">📩</div>
+        <div class="stat-info">
+          <h3 id="totalMensajes">0</h3>
+          <p>Mensajes</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">👤</div>
+        <div class="stat-info">
+          <h3 id="totalClientes">0</h3>
+          <p>Clientes</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <div class="admin-tabs">
+        <button class="tab-btn active" data-tab="pedidos">📦 Pedidos</button>
+        <button class="tab-btn" data-tab="mensajes">📩 Mensajes</button>
+      </div>
+
+      <div class="tab-content">
+        <!-- Panel de Pedidos -->
+        <div id="tab-pedidos" class="tab-pane active">
+          <div class="filtros-pedidos">
+            <select id="filtroEstado">
+              <option value="todos">Todos los estados</option>
+              <option value="pendiente">Pendientes</option>
+              <option value="en-proceso">En proceso</option>
+              <option value="completado">Completados</option>
+            </select>
+            <input type="date" id="filtroFecha">
+            <button id="btnActualizar" class="btn-actualizar">🔄 Actualizar</button>
+          </div>
+
+          <div class="pedidos-list" id="listaPedidosAdmin">
+            <div class="loading">Cargando pedidos...</div>
+          </div>
+        </div>
+
+        <!-- Panel de Mensajes -->
+        <div id="tab-mensajes" class="tab-pane">
+          <div class="mensajes-list" id="listaMensajesAdmin">
+            <div class="loading">Cargando mensajes...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal para editar pedido -->
+  <div id="modalPedido" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Editar Pedido</h2>
+        <span class="close">&times;</span>
+      </div>
+      <div class="modal-body" id="modalPedidoBody">
+        <!-- Contenido dinámico -->
+      </div>
+    </div>
+  </div>
+
+ <!-- En admin.html -->
+<script src="auth-guard.js"></script>
+<script type="module" src="admin.js"></script>
+</body>
+</html>

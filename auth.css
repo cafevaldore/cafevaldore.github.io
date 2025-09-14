@@ -65,27 +65,42 @@ body::before {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #ffd700, #ffed4e, #ffd700);
+  background: linear-gradient(90deg, #DAA520, #DAA515, #DAA500);
   border-radius: 25px 25px 0 0;
 }
 
 .auth-container h1 {
   margin-bottom: 2.5rem;
-  color: #ffd700;
+  color: #DAA520;
   font-size: 2.5rem;
   font-weight: 700;
   text-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
-  /* Removido el background-clip que causaba problemas */
 }
 
 .auth-form {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 1.5rem;
 }
 
+.auth-form.active {
+  display: flex;
+  animation: fadeInSlideUp 0.5s ease;
+}
+
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .auth-form h2 {
-  color: #ffd700;
+  color: #DAA520;
   font-size: 1.8rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
@@ -102,14 +117,13 @@ input {
   font-family: inherit;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  /* Asegurar que el texto sea visible */
   -webkit-text-fill-color: #333;
   text-fill-color: #333;
 }
 
 input:focus {
   outline: none;
-  border-color: #ffd700;
+  border-color: #DAA520;
   background: rgba(255, 255, 255, 1);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
@@ -125,7 +139,6 @@ input::placeholder {
   text-fill-color: #666;
 }
 
-/* Asegurar que el texto del input sea siempre visible */
 input::-webkit-input-placeholder {
   color: #666;
   -webkit-text-fill-color: #666;
@@ -141,7 +154,7 @@ input::-moz-placeholder {
 }
 
 button {
-  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  background: linear-gradient(135deg, #DAA520, #ffed4e);
   color: #231a11;
   border: none;
   padding: 1.25rem;
@@ -153,7 +166,6 @@ button {
   box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
   position: relative;
   overflow: hidden;
-  /* Asegurar texto visible en botones */
   -webkit-text-fill-color: #231a11;
   text-fill-color: #231a11;
 }
@@ -174,7 +186,7 @@ button:hover::before {
 }
 
 button:hover {
-  background: linear-gradient(135deg, #ffed4e, #fff59d);
+  background: linear-gradient(135deg, #DAA520, #fff59d);
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
   color: #231a11;
@@ -189,25 +201,24 @@ button:active {
 
 .toggle-btn {
   background: transparent !important;
-  color: #ffd700 !important;
+  color: #DAA520 !important;
   text-decoration: underline;
   margin-top: 1.5rem;
   padding: 0.75rem;
   font-weight: 500;
   transition: all 0.3s ease;
   border-radius: 10px;
-  /* Forzar color visible */
-  -webkit-text-fill-color: #ffd700 !important;
-  text-fill-color: #ffd700 !important;
+  -webkit-text-fill-color: #DAA520 !important;
+  text-fill-color: #DAA520 !important;
 }
 
 .toggle-btn:hover {
   background: rgba(255, 215, 0, 0.1) !important;
-  color: #ffed4e !important;
+  color: #DAA520 !important;
   text-decoration: none;
   transform: scale(1.05);
-  -webkit-text-fill-color: #ffed4e !important;
-  text-fill-color: #ffed4e !important;
+  -webkit-text-fill-color: #DAA520 !important;
+  text-fill-color: #DAA520 !important;
 }
 
 .error {
@@ -220,9 +231,21 @@ button:active {
   font-weight: 500;
   box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
   animation: shakeError 0.5s ease-in-out;
-  /* Asegurar texto visible en errores */
   -webkit-text-fill-color: #fca5a5;
   text-fill-color: #fca5a5;
+}
+
+.success {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.15));
+  color: #86efac;
+  padding: 1rem;
+  border-radius: 15px;
+  margin-bottom: 1.5rem;
+  border: 2px solid rgba(34, 197, 94, 0.3);
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2);
+  -webkit-text-fill-color: #86efac;
+  text-fill-color: #86efac;
 }
 
 @keyframes shakeError {
@@ -232,7 +255,7 @@ button:active {
 }
 
 .back-link {
-  color: #ffd700;
+  color: #DAA520;
   text-decoration: none;
   margin-top: 2rem;
   display: inline-flex;
@@ -243,31 +266,18 @@ button:active {
   transition: all 0.3s ease;
   font-weight: 500;
   border: 2px solid transparent;
-  /* Asegurar texto visible en enlaces */
-  -webkit-text-fill-color: #ffd700;
-  text-fill-color: #ffd700;
+  -webkit-text-fill-color: #DAA520;
+  text-fill-color: #DAA520;
 }
 
 .back-link:hover {
-  color: #ffed4e;
+  color: #DAA520;
   background: rgba(255, 215, 0, 0.1);
   border-color: rgba(255, 215, 0, 0.3);
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
-  -webkit-text-fill-color: #ffed4e;
-  text-fill-color: #ffed4e;
-}
-
-/* Formularios específicos */
-#loginForm, #registerForm {
-  opacity: 1;
-  transform: translateX(0);
-  transition: all 0.4s ease;
-}
-
-#loginForm.hidden, #registerForm.hidden {
-  opacity: 0;
-  transform: translateX(-20px);
+  -webkit-text-fill-color: #DAA520;
+  text-fill-color: #DAA520;
 }
 
 /* Estados de carga */
@@ -345,7 +355,7 @@ input:invalid:not(:placeholder-shown) {
   }
 }
 
-/* Efectos de enfoque mejorados - sin afectar la visibilidad del texto */
+/* Efectos de enfoque mejorados */
 input:focus {
   animation: focusPulse 0.3s ease;
 }
@@ -358,7 +368,7 @@ input:focus {
 
 /* Mejora en la accesibilidad */
 button:focus, input:focus, .back-link:focus {
-  outline: 2px solid #ffd700;
+  outline: 2px solid #DAA520;
   outline-offset: 2px;
 }
 
@@ -367,30 +377,6 @@ button:focus, input:focus, .back-link:focus {
   .auth-container:hover {
     box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     transform: translateY(-5px);
-  }
-}
-
-/* Animación de entrada de elementos - sin afectar la visibilidad */
-/* .auth-form > * {
-  animation: fadeInSlideUp 0.6s ease forwards;
-  opacity: 0;
-} */
-
-.auth-form > *:nth-child(1) { animation-delay: 0.1s; }
-.auth-form > *:nth-child(2) { animation-delay: 0.2s; }
-.auth-form > *:nth-child(3) { animation-delay: 0.3s; }
-.auth-form > *:nth-child(4) { animation-delay: 0.4s; }
-.auth-form > *:nth-child(5) { animation-delay: 0.5s; }
-.auth-form > *:nth-child(6) { animation-delay: 0.6s; }
-
-@keyframes fadeInSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -418,3 +404,11 @@ input[type="tel"]:focus {
   -webkit-text-fill-color: #333 !important;
   text-fill-color: #333 !important;
 }
+
+/* Animaciones para elementos del formulario */
+.auth-form > *:nth-child(1) { animation-delay: 0.1s; }
+.auth-form > *:nth-child(2) { animation-delay: 0.2s; }
+.auth-form > *:nth-child(3) { animation-delay: 0.3s; }
+.auth-form > *:nth-child(4) { animation-delay: 0.4s; }
+.auth-form > *:nth-child(5) { animation-delay: 0.5s; }
+.auth-form > *:nth-child(6) { animation-delay: 0.6s; }

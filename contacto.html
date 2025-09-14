@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto - Café Valdore</title>
+   <link rel="stylesheet" href="contacto.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="carrito.css">
+  <link rel="stylesheet" href="cerrarcarrito.css">
+</head>
+<body>
+  <!-- Header con menú responsive -->
+  <header>
+    <nav>
+      <a href="index.html" class="logo">☕ Café Valdore</a>
+      
+      <!-- Menú desktop -->
+      <ul class="nav-links">
+        <li><a href="index.html">🏠 Inicio</a></li>
+        <li><a href="historia.html">📖 Nuestra Historia</a></li>
+        <li><a href="pedidos.html">📦 Mis Pedidos</a></li>
+        <li><a href="contacto.html" class="active">📞 Contáctanos</a></li>
+        <li><button id="carritoBtn" class="cart-btn">🛒 Carrito</button></li>
+        <li><button id="authBtn" class="auth-btn">🔑 Iniciar Sesión</button></li>
+      </ul>
+
+      <!-- Botón hamburguesa -->
+      <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </nav>
+
+    <!-- Menú móvil -->
+    <div class="mobile-menu" id="mobileMenu">
+      <ul>
+        <li><a href="index.html">🏠 Inicio</a></li>
+        <li><a href="historia.html">📖 Nuestra Historia</a></li>
+        <li><a href="pedidos.html">📦 Mis Pedidos</a></li>
+        <li><a href="contacto.html" class="active">📞 Contáctanos</a></li>
+        <li><button id="carritoMobileBtn" class="cart-btn">🛒 Carrito</button></li>
+        <li><button id="authMobileBtn" class="auth-btn">🔑 Iniciar Sesión</button></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main>
+    <section class="contacto-hero">
+      <div class="hero-content">
+        <h1>📞 Contáctanos</h1>
+        <p>Estamos aquí para servirte. ¡Hablemos sobre café!</p>
+      </div>
+    </section>
+
+<div class="contacto-container">
+  <!-- Columna izquierda (información de contacto) -->
+  <div class="contacto-info">
+    <div class="info-card">
+      <div class="info-icon">📍</div>
+      <h3>Nuestra Ubicación</h3>
+      <p>Valle de Laboyos, Pitalito - Huila, Colombia</p>
+      <a href="https://maps.app.goo.gl/WmAuCs1KUufksX1DA" target="_blank" class="btn-link">Ver en Google Maps</a>
+    </div>
+
+    <div class="info-card">
+      <div class="info-icon">📱</div>
+      <h3>Teléfonos</h3>
+      <p>+57 301 4518 350</p>
+      <p>+57 314 4678600</p>
+      <a href="https://wa.me/573014518350" target="_blank" class="btn-link">💬 Escribir por WhatsApp</a>
+    </div>
+
+    <div class="info-card">
+      <div class="info-icon">✉️</div>
+      <h3>Correo Electrónico</h3>
+      <p>cafevaldore@gmail.com</p>
+      <a href="mailto:cafevaldore@gmail.com" class="btn-link">Enviar correo</a>
+    </div>
+  </div>
+  
+ <div class="contacto-formulario">
+        <h2>📩 Envíanos un mensaje</h2>
+        <form id="formularioContacto">
+          <div class="form-group">
+            <input type="text" id="nombreContacto" placeholder="Nombre completo" required>
+          </div>
+          
+          <div class="form-group">
+            <input type="email" id="emailContacto" placeholder="Correo electrónico" required>
+          </div>
+          
+          <div class="form-group">
+            <input type="tel" id="telefonoContacto" placeholder="Teléfono (opcional)">
+          </div>
+          
+          <div class="form-group">
+            <select id="asuntoContacto" required>
+              <option value="">Selecciona el asunto</option>
+              <option value="pedido">Información sobre pedidos</option>
+              <option value="producto">Consulta sobre productos</option>
+              <option value="distribucion">Oportunidades de distribución</option>
+              <option value="otros">Otros asuntos</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <textarea id="mensajeContacto" placeholder="Escribe tu mensaje aquí..." rows="5" required></textarea>
+          </div>
+          
+          <button type="submit" class="btn-enviar">📤 Enviar Mensaje</button>
+        </form>
+      </div>
+    
+    <div class="info-card horario-card">
+      <div class="info-icon">🕒</div>
+      <h3>Horario de Atención</h3>
+      <p>Lunes a Viernes: 7:00 AM - 6:00 PM</p>
+      <p>Sábados: Cerrado</p>
+      <p>Domingos: Cerrado</p>
+    </div>
+  </div>
+</div>
+
+    <section class="mapa-section">
+      <h2>📍 ¿Dónde encontrarnos?</h2>
+      <div class="mapa-container">
+        <!-- Mapa de Google Maps (iframe) -->
+        <div class="mapa">
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3984.2242895082!2d-76.0670119!3d1.906771!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e250de65cf8e135%3A0x7e827c50a357aa91!2sCaf%C3%A9%20Valdore!5e0!3m2!1ses!2sco!4v1726000000000!5m2!1ses!2sco" 
+            width="100%" 
+            height="400" 
+            style="border:0;" 
+            allowfullscreen="" 
+            loading="lazy">
+          </iframe>
+        </div>
+      </div>
+    </section>
+
+    <section class="preguntas-frecuentes">
+      <h2>❓ Preguntas Frecuentes</h2>
+      <div class="faq-container">
+        <div class="faq-item">
+          <div class="faq-pregunta">
+            <h3>¿Hacen envíos a todo Colombia?</h3>
+            <span class="faq-toggle">+</span>
+          </div>
+          <div class="faq-respuesta">
+            <p>Sí, realizamos envíos a todo el territorio colombiano. El tiempo de entrega varía según la ubicación, generalmente entre 2-5 días hábiles.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-pregunta">
+            <h3>¿Qué métodos de pago aceptan?</h3>
+            <span class="faq-toggle">+</span>
+          </div>
+          <div class="faq-respuesta">
+            <p>Aceptamos transferencias bancarias, pago contra entrega y a través de plataformas como Nequi.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-pregunta">
+            <h3>¿Ofrecen muestras de sus productos?</h3>
+            <span class="faq-toggle">+</span>
+          </div>
+          <div class="faq-respuesta">
+            <p>Sí, ofrecemos muestras para negocios y distribuidores potenciales. Contáctanos para coordinar el envío de muestras según tu ubicación.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-pregunta">
+            <h3>¿Tienen punto de venta físico?</h3>
+            <span class="faq-toggle">+</span>
+          </div>
+          <div class="faq-respuesta">
+            <p>Actualmente operamos principalmente online, pero puedes visitarnos en nuestra finca en Pitalito, Huila, con cita previa.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer-contacto">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>☕ Café Valdore</h3>
+        <p>Desde el Valle de Laboyos, cultivamos y procesamos café de la más alta calidad para los amantes del buen café.</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Enlaces Rápidos</h4>
+        <ul>
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="historia.html">Nuestra Historia</a></li>
+          <li><a href="pedidos.html">Mis Pedidos</a></li>
+          <li><a href="contacto.html">Contáctanos</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Redes Sociales</h4>
+        <div class="social-links">
+          <a href="https://www.facebook.com/profile.php?id=61580621437211" target="_blank">
+  <img src="https://img.shields.io/badge/Facebook-094293?style=for-the-badge&logo=facebook&logoColor=white" alt="Sígueme en Instagram"></a>
+          <a href="https://instagram.com/jarol9625" target="_blank">
+  <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Sígueme en Instagram"></a>
+<a href="mailto:cafevaldore@gmail.com" target="_blank">
+  <img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email me">
+</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Café Valdore. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+      <!-- Overlay del carrito -->
+  <div class="carrito-overlay" id="carritoOverlay"></div>
+
+  <!-- Carrito lateral -->
+  <aside id="carrito" class="carrito-sidebar">
+    <button id="cerrarCarrito" class="cerrarBtn">X</button>
+    <h2>Tu Carrito 🛒</h2>
+    <ul id="listaCarrito"></ul>
+    <p id="totalCarrito">Total: $0</p>
+    <button id="guardarPedido" class="btn-confirmar">
+      ✅ Confirmar Pedido
+    </button>
+    <button id="vaciarCarrito" class="btn-vaciar">
+      🗑️ Vaciar Carrito
+    </button>
+  </aside>
+
+  <!-- Scripts -->
+  <script type="module" src="main.js"></script>
+</body>
+</html>

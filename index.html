@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="formulario.css">
   <link rel="stylesheet" href="carrito.css">
   <link rel="stylesheet" href="cerrarcarrito.css">
+  <link rel="stylesheet" href="contacto.css">
 </head>
 <body>
   <!-- Header con menú responsive -->
@@ -20,8 +21,10 @@
         <li><a href="index.html">🏠 Inicio</a></li>
         <li><a href="historia.html">📖 Nuestra Historia</a></li>
         <li><a href="pedidos.html">📦 Mis Pedidos</a></li>
+        <li><a href="contacto.html">📞 Contáctanos</a></li>
         <li><button id="carritoBtn" class="cart-btn">🛒 Carrito</button></li>
         <li><button id="authBtn" class="auth-btn">🔑 Iniciar Sesión</button></li>
+        
       </ul>
 
       <!-- Botón hamburguesa -->
@@ -38,8 +41,10 @@
         <li><a href="index.html">🏠 Inicio</a></li>
         <li><a href="historia.html">📖 Nuestra Historia</a></li>
         <li><a href="pedidos.html">📦 Mis Pedidos</a></li>
+        <li><a href="contacto.html">📞 Contáctanos</a></li>
         <li><button id="carritoMobileBtn" class="cart-btn">🛒 Carrito</button></li>
         <li><button id="authMobileBtn" class="auth-btn">🔑 Iniciar Sesión</button></li>
+        
       </ul>
     </div>
   </header>
@@ -48,9 +53,9 @@
   <main>
     <section class="presentacion">
       <h2>Bienvenido al Café Especial del Huila</h2>
-      <p>Desde el Valle de Laboyos, Pitalito – cultivamos y procesamos café de la más alta calidad.</p>
+      <p>Desde el Valle de Laboyos, en las montañas de Pitalito-Huila, cultivamos café especial con estándares de calidad excepcionales. Cada taza cuenta la historia de nuestra tierra y dedicación.</p>
       <div id="userWelcome" class="user-info" style="display: none;">
-        <p>¡Hola, <span id="userName"></span>! 👋</p>
+        <p>¡Bienvenido,  <span id="userName"></span> tu próxima taza favorita te espera! 👋</p>
       </div>
     </section>
 
@@ -106,6 +111,48 @@
     </button>
   </aside>
   
+  
+  <!-- Footer -->
+  <footer class="footer-contacto">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>☕ Café Valdore</h3>
+        <p>Desde el Valle de Laboyos, cultivamos y procesamos café de la más alta calidad para los amantes del buen café.</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Enlaces Rápidos</h4>
+        <ul>
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="historia.html">Nuestra Historia</a></li>
+          <li><a href="pedidos.html">Mis Pedidos</a></li>
+          <li><a href="contacto.html">Contáctanos</a></li>
+        </ul>
+      </div>
+      
+     <div class="footer-section">
+        <h4>Redes Sociales</h4>
+        <div class="social-links">
+          <a href="https://www.facebook.com/profile.php?id=61580621437211" target="_blank">
+  <img src="https://img.shields.io/badge/Facebook-094293?style=for-the-badge&logo=facebook&logoColor=white" alt="Sígueme en Instagram"></a>
+          <a href="https://instagram.com/jarol9625" target="_blank">
+  <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Sígueme en Instagram"></a>
+<a href="mailto:cafevaldore@gmail.com" target="_blank">
+  <img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email me">
+</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Café Valdore.
+        <span class="admin-link" onclick="window.location.href='admin-login.html'">
+      Todos los derechos reservados
+    </span>
+      </p>
+    </div>
+  </footer>
+
   <script type="module" src="main.js"></script>
 </body>
 </html>

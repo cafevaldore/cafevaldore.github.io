@@ -12,7 +12,7 @@
   overflow-y: auto;
   z-index: 2000;
   backdrop-filter: blur(15px);
-  border-left: 4px solid #ffd700;
+  border-left: 4px solid #DAA520;
 }
 
 #carrito.active { 
@@ -51,7 +51,7 @@
   color: #666;
   background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 237, 78, 0.05));
   border-radius: 20px;
-  border: 2px dashed #ffd700;
+  border: 2px dashed #DAA520;
 }
 
 .carrito-vacio .empty-cart-icon {
@@ -91,14 +91,14 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #231a11, #ffd700, #231a11);
+  background: linear-gradient(90deg, #231a11, #DAA520, #231a11);
   border-radius: 20px 20px 0 0;
 }
 
 .carrito-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-  border-color: #ffd700;
+  border-color: #DAA520;
 }
 
 .carrito-item-info {

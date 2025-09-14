@@ -37,7 +37,7 @@
     .logo {
       font-size: 1.5rem;
       font-weight: bold;
-      color: #ffd700;
+      color: #DAA520;
       text-decoration: none;
       display: flex;
       align-items: center;
@@ -74,23 +74,23 @@
     }
 
     .nav-links .auth-btn {
-      background: #ffd700;
+      background: #DAA520;
       color: #2e2113;
       font-weight: bold;
     }
 
     .nav-links .auth-btn:hover {
-      background: #ffed4e;
+      background: #DAA520;
       color: #231a11;
     }
 
     .nav-links .cart-btn {
       background: rgba(255, 255, 255, 0.1);
-      border: 2px solid #ffd700;
+      border: 2px solid #DAA520;
     }
 
     .nav-links .cart-btn:hover {
-      background: #ffd700;
+      background: #DAA520;
       color: #231a11;
     }
 
@@ -111,7 +111,7 @@
     .hamburger span {
       width: 25px;
       height: 3px;
-      background: #ffd700;
+      background: #DAA520;
       margin: 3px 0;
       transition: all 0.3s ease;
       border-radius: 2px;
@@ -191,7 +191,7 @@
     }
 
     .mobile-menu .auth-btn {
-      background: #ffd700;
+      background: #DAA520;
       color: #2e2113;
       font-weight: bold;
       margin-top: 1rem;
@@ -200,7 +200,7 @@
 
     .mobile-menu .cart-btn {
       background: rgba(255, 255, 255, 0.1);
-      border: 2px solid #ffd700;
+      border: 2px solid #DAA520;
       margin-top: 0.5rem;
       justify-content: center;
     }

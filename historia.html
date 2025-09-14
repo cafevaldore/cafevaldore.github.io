@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nuestra Historia - Café Valdore</title>
   <link rel="stylesheet" href="carrito.css">
-    <link rel="stylesheet" href="styles.css">
-      <link rel="stylesheet" href="cerrarcarrito.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="cerrarcarrito.css">
   <link rel="stylesheet" href="historia.css">
+  <link rel="stylesheet" href="contacto.css">
 
 
 </head>
@@ -24,6 +25,7 @@
         <li><a href="index.html">🏠 Inicio</a></li>
         <li><a href="historia.html">📖 Nuestra Historia</a></li>
         <li><a href="pedidos.html">📦 Mis Pedidos</a></li>
+        <li><a href="contacto.html">📞 Contáctanos</a></li>
         <li><button id="carritoBtn" class="cart-btn">🛒 Carrito</button></li>
         <li><button id="authBtn" class="auth-btn">🔑 Iniciar Sesión</button></li>
       </ul>
@@ -42,6 +44,7 @@
         <li><a href="index.html">🏠 Inicio</a></li>
         <li><a href="historia.html">📖 Nuestra Historia</a></li>
         <li><a href="pedidos.html">📦 Mis Pedidos</a></li>
+        <li><a href="contacto.html">📞 Contáctanos</a></li>
         <li><button id="carritoMobileBtn" class="cart-btn">🛒 Carrito</button></li>
         <li><button id="authMobileBtn" class="auth-btn">🔑 Iniciar Sesión</button></li>
       </ul>
@@ -51,7 +54,7 @@
   <!-- Contenido principal -->
   <main>
     <div id="userWelcome" class="user-info" style="display: none;">
-      <p>¡Hola, <span id="userName"></span>! 👋</p>
+      <p>¡<span id="userName"></span>, así nace el mejor café! 👋</p>
     </div>
 
     <section class="historia">
@@ -127,8 +130,43 @@
       🗑️ Vaciar Carrito
     </button>
   </aside>
-  
-  <script type="module" src="main.js"></script>
+
+  <!-- Footer -->
+  <footer class="footer-contacto">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>☕ Café Valdore</h3>
+        <p>Desde el Valle de Laboyos, cultivamos y procesamos café de la más alta calidad para los amantes del buen café.</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Enlaces Rápidos</h4>
+        <ul>
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="historia.html">Nuestra Historia</a></li>
+          <li><a href="pedidos.html">Mis Pedidos</a></li>
+          <li><a href="contacto.html">Contáctanos</a></li>
+        </ul>
+      </div>
+      
+     <div class="footer-section">
+        <h4>Redes Sociales</h4>
+        <div class="social-links">
+          <a href="https://www.facebook.com/profile.php?id=61580621437211" target="_blank">
+  <img src="https://img.shields.io/badge/Facebook-094293?style=for-the-badge&logo=facebook&logoColor=white" alt="Sígueme en Instagram"></a>
+          <a href="https://instagram.com/jarol9625" target="_blank">
+  <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Sígueme en Instagram"></a>
+<a href="mailto:cafevaldore@gmail.com" target="_blank">
+  <img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email me">
+</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Café Valdore. Todos los derechos reservados.</p>
+    </div>
+  </footer>  <script type="module" src="main.js"></script>
 
 </body>
 </html>

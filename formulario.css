@@ -42,7 +42,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #231a11, #ffd700, #231a11);
+  background: linear-gradient(90deg, #231a11, #DAA520, #231a11);
   border-radius: 25px 25px 0 0;
 }
 
@@ -74,7 +74,7 @@
   font-size: 1.3rem;
   font-weight: 600;
   margin: 1.5rem 0 1rem 0;
-  border-bottom: 2px solid #ffd700;
+  border-bottom: 2px solid #DAA520;
   padding-bottom: 0.5rem;
 }
 
@@ -105,7 +105,7 @@
   margin-bottom: 0.5rem;
   background: rgba(255,255,255,0.7);
   border-radius: 12px;
-  border-left: 4px solid #ffd700;
+  border-left: 4px solid #DAA520;
   transition: all 0.3s ease;
 }
 
@@ -147,7 +147,7 @@ form textarea {
 
 form input:focus, 
 form textarea:focus {
-  border-color: #ffd700;
+  border-color: #DAA520;
   background: rgba(255,255,255,1);
   outline: none;
   transform: translateY(-2px);
@@ -343,10 +343,10 @@ form input:valid {
 }
 
 .form-container::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  background: linear-gradient(135deg, #DAA520, #DAA520);
   border-radius: 3px;
 }
 
 .form-container::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #ffed4e, #fff59d);
+  background: linear-gradient(135deg, #DAA520, #DAA520);
 }
