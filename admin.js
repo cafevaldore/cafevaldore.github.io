@@ -290,11 +290,11 @@ window.abrirModalPedido = function(pedidoId) {
       <div class="productos-modal">
         <h4>☕ Productos</h4>
         <div class="productos-list-modal">
-          ${(pedido.productos || []).map(producto => `
+          ${(pedido.pedido || []).map(producto => `
             <div class="producto-modal-item">
               <div class="producto-info">
-                <h5>${producto.nombre}</h5>
-                <p>Peso: ${producto.peso || '250g'}</p>
+                <h5>${producto.producto}</h5>
+                <p>Peso: 250g</p>
                 <p>Precio unitario: ${formatearPrecio(producto.precio)}</p>
               </div>
               <div class="producto-cantidad">

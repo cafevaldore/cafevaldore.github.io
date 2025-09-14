@@ -451,9 +451,9 @@
   color: #92400E;
 }
 
-.estado-proceso {
-  background: #DBEAFE;
-  color: #1E40AF;
+.estado-en-proceso{
+  background: #89b2e7; 
+  color: #1E40AF; 
 }
 
 .estado-completado {

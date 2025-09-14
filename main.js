@@ -369,7 +369,8 @@ window.mostrarFormularioPedido = function() {
       <input type="text" id="nombreCliente" placeholder="Nombre completo *" required>
       <input type="tel" id="telefonoCliente" placeholder="Teléfono *" required>
       <input type="text" id="direccionCliente" placeholder="Dirección completa *" required>
-      <textarea id="observaciones" placeholder="Observaciones adicionales (opcional)" rows="3"></textarea>
+      <input type="text" id="ciudadCliente" placeholder="Ciudad *" required>
+      <textarea id="notas" placeholder="Observaciones adicionales (opcional)" rows="3"></textarea>
       
       <div class="form-buttons">
         <button type="button" id="cancelarPedido">❌ Cancelar</button>
@@ -425,26 +426,29 @@ async function guardarPedidoFirebase() {
   const nombre = document.getElementById('nombreCliente').value.trim();
   const telefono = document.getElementById('telefonoCliente').value.trim();
   const direccion = document.getElementById('direccionCliente').value.trim();
-  const observaciones = document.getElementById('observaciones').value.trim();
+  const ciudad = document.getElementById('ciudadCliente').value.trim();
+  const notas = document.getElementById('notas').value.trim();
 
-  if (!nombre || !telefono || !direccion) {
+  if (!nombre || !telefono || !direccion || !ciudad) {
     throw new Error('Por favor completa todos los campos obligatorios');
   }
 
-  const pedidoData = {
-    uid: user.uid,
-    email: user.email,
-    cliente: {
-      nombre,
-      telefono,
-      direccion,
-      observaciones
-    },
-    pedido: carrito,
-    total: total,
-    fecha: new Date().toISOString(),
-    estado: 'pendiente'
-  };
+// Debería ser esto:
+const pedidoData = {
+  uid: user.uid,
+  datosCliente: {
+    nombre,
+    telefono,
+    direccion,
+    ciudad,
+    email: user.email, // Mover el email aquí
+    notas: notas // Cambiar de observaciones a notas
+  },
+  pedido: carrito,
+  total: total,
+  fecha: new Date().toISOString(),
+  estado: 'pendiente'
+};
 
   await addDoc(collection(db, "pedidos"), pedidoData);
   console.log("✅ Pedido guardado exitosamente");
