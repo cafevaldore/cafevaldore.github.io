@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nuestra Historia - Café Valdore</title>
+  <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="carrito.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="cerrarcarrito.css">
   <link rel="stylesheet" href="historia.css">
   <link rel="stylesheet" href="contacto.css">
-
-
+  <link rel="stylesheet" href="formulario.css">
 </head>
 <body>
   <!-- Header con menú responsive -->
@@ -114,7 +114,7 @@
     </section>
   </main>
 
-    <!-- Overlay del carrito -->
+  <!-- Overlay del carrito -->
   <div class="carrito-overlay" id="carritoOverlay"></div>
 
   <!-- Carrito lateral -->
@@ -153,7 +153,7 @@
         <h4>Redes Sociales</h4>
         <div class="social-links">
           <a href="https://www.facebook.com/profile.php?id=61580621437211" target="_blank">
-  <img src="https://img.shields.io/badge/Facebook-094293?style=for-the-badge&logo=facebook&logoColor=white" alt="Sígueme en Instagram"></a>
+  <img src="https://img.shields.io/badge/Facebook-094293?style=for-the-badge&logo=facebook&logoColor=white" alt="Sígueme en Facebook"></a>
           <a href="https://instagram.com/jarol9625" target="_blank">
   <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Sígueme en Instagram"></a>
 <a href="mailto:cafevaldore@gmail.com" target="_blank">
@@ -166,7 +166,38 @@
     <div class="footer-bottom">
       <p>&copy; 2025 Café Valdore. Todos los derechos reservados.</p>
     </div>
-  </footer>  <script type="module" src="main.js"></script>
+  </footer>
 
+    <!-- Chat flotante para comunicación con administrador -->
+  <div class="chat-container" id="chatContainer">
+    <button class="chat-toggle" id="chatToggle">
+      💬
+      <span class="chat-badge" id="chatBadge">0</span>
+    </button>
+    
+    <div class="chat-window" id="chatWindow">
+      <div class="chat-header">
+        <h3>💬 Chat con Café Valdore</h3>
+        <button class="chat-close" id="chatClose">&times;</button>
+      </div>
+      
+      <div class="chat-messages" id="chatMessages">
+        <!-- Los mensajes se cargarán aquí dinámicamente -->
+        <div class="chat-welcome">
+          <p>¡Hola! ¿En qué podemos ayudarte?</p>
+          <p>Estamos aquí para responder tus preguntas sobre nuestros productos, pedidos o cualquier consulta que tengas.</p>
+        </div>
+      </div>
+      
+      <div class="chat-input">
+        <textarea id="mensajeChat" placeholder="Escribe tu mensaje aquí..." rows="2"></textarea>
+        <button id="enviarMensajeChat">📤</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Cargar scripts en el orden correcto -->
+  <script type="module" src="main.js"></script>
+  <script type="module" src="chat.js"></script>
 </body>
 </html>

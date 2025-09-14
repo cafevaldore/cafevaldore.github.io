@@ -83,6 +83,7 @@
       <div class="admin-tabs">
         <button class="tab-btn active" data-tab="pedidos">📦 Pedidos</button>
         <button class="tab-btn" data-tab="mensajes">📩 Mensajes</button>
+        <button class="tab-btn" data-tab="chat">💬 Chat Clientes</button>
       </div>
 
       <div class="tab-content">
@@ -110,6 +111,56 @@
             <div class="loading">Cargando mensajes...</div>
           </div>
         </div>
+
+        <!-- Panel de Chat -->
+        <div id="tab-chat" class="tab-pane">
+          <div class="chat-admin-container">
+            <div class="conversaciones-sidebar">
+              <div class="sidebar-header">
+                <h3>💬 Conversaciones</h3>
+                <button id="actualizarConversaciones" class="btn-actualizar-small">🔄</button>
+              </div>
+              
+              <div class="conversaciones-filtros">
+                <input type="text" id="buscarConversacion" placeholder="Buscar cliente...">
+                <select id="filtroConversacionesEstado">
+                  <option value="todas">Todas</option>
+                  <option value="activas">Activas</option>
+                  <option value="sin-responder">Sin responder</option>
+                </select>
+              </div>
+              
+              <div class="conversaciones-lista" id="conversacionesLista">
+                <div class="loading-conversaciones">Cargando conversaciones...</div>
+              </div>
+            </div>
+            
+            <div class="chat-area">
+              <div class="chat-header" id="chatHeader">
+                <div class="cliente-info">
+                  <h4 id="clienteNombre">Selecciona una conversación</h4>
+                  <span id="clienteEmail"></span>
+                </div>
+                <div class="chat-status" id="chatStatus">
+                  <span class="status-indicator"></span>
+                </div>
+              </div>
+              
+              <div class="chat-messages" id="chatMessages">
+                <div class="chat-welcome">
+                  <p>👋 Selecciona una conversación para comenzar a chatear con tus clientes</p>
+                </div>
+              </div>
+              
+              <div class="chat-input-container" id="chatInputContainer" style="display: none;">
+                <div class="chat-input-area">
+                  <textarea id="mensajeAdmin" placeholder="Escribe tu mensaje..." rows="2"></textarea>
+                  <button id="enviarMensajeAdmin" class="btn-enviar">📤 Enviar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -127,8 +178,10 @@
     </div>
   </div>
 
- <!-- En admin.html -->
-<script src="auth-guard.js"></script>
-<script type="module" src="admin.js"></script>
+  <!-- Scripts -->
+  <script src="auth-guard.js"></script>
+  <script type="module" src="admin.js"></script>
+  <script type="module" src="admin-chat.js"></script>
+
 </body>
 </html>

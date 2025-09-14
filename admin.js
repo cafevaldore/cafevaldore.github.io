@@ -7,7 +7,7 @@ import {
   query, 
   orderBy, 
   where,
-  Timestamp 
+  Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // Variables globales
@@ -76,15 +76,15 @@ function setupEventListeners() {
   });
 
   // Filtros
-  filtroEstado.addEventListener('change', filtrarPedidos);
-  filtroFecha.addEventListener('change', filtrarPedidos);
-  btnActualizar.addEventListener('click', () => {
+  if (filtroEstado) filtroEstado.addEventListener('change', filtrarPedidos);
+  if (filtroFecha) filtroFecha.addEventListener('change', filtrarPedidos);
+  if (btnActualizar) btnActualizar.addEventListener('click', () => {
     cargarPedidos();
     cargarMensajes();
   });
 
   // Modal
-  closeModal.addEventListener('click', cerrarModal);
+  if (closeModal) closeModal.addEventListener('click', cerrarModal);
   window.addEventListener('click', (e) => {
     if (e.target === modal) cerrarModal();
   });
@@ -95,11 +95,13 @@ function switchTab(tabName) {
   
   // Actualizar botones
   tabButtons.forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+  const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
+  if (activeButton) activeButton.classList.add('active');
   
   // Actualizar contenido
   tabPanes.forEach(pane => pane.classList.remove('active'));
-  document.getElementById(`tab-${tabName}`).classList.add('active');
+  const activePane = document.getElementById(`tab-${tabName}`);
+  if (activePane) activePane.classList.add('active');
   
   // Cargar contenido específico
   if (tabName === 'pedidos') {
@@ -331,10 +333,10 @@ window.cambiarEstadoYCerrar = async function(pedidoId, nuevoEstado) {
 };
 
 function cerrarModal() {
-  modal.style.display = 'none';
+  if (modal) modal.style.display = 'none';
 }
 
-// GESTIÓN DE MENSAJES
+// GESTIÓN DE MENSAJES (solo mensajes de contacto)
 async function cargarMensajes() {
   try {
     const q = query(collection(db, "mensajesContacto"), orderBy("fecha", "desc"));
@@ -483,7 +485,7 @@ function actualizarEstadisticas() {
     // Agregar emails únicos de mensajes (ya que no tienen UID)
     mensajesData.forEach(mensaje => {
       if (mensaje.email) {
-        uidsUnicos.add(mensaje.email); // Usamos email como identificador único para mensajes
+        uidsUnicos.add(mensaje.email);
       }
     });
     

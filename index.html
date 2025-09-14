@@ -152,7 +152,34 @@
       </p>
     </div>
   </footer>
-
+    <!-- Chat flotante para comunicación con administrador -->
+  <div class="chat-container" id="chatContainer">
+    <button class="chat-toggle" id="chatToggle">
+      💬
+      <span class="chat-badge" id="chatBadge">0</span>
+    </button>
+    
+    <div class="chat-window" id="chatWindow">
+      <div class="chat-header">
+        <h3>💬 Chat con Café Valdore</h3>
+        <button class="chat-close" id="chatClose">&times;</button>
+      </div>
+      
+      <div class="chat-messages" id="chatMessages">
+        <!-- Los mensajes se cargarán aquí dinámicamente -->
+        <div class="chat-welcome">
+          <p>¡Hola! ¿En qué podemos ayudarte?</p>
+          <p>Estamos aquí para responder tus preguntas sobre nuestros productos, pedidos o cualquier consulta que tengas.</p>
+        </div>
+      </div>
+      
+      <div class="chat-input">
+        <textarea id="mensajeChat" placeholder="Escribe tu mensaje aquí..." rows="2"></textarea>
+        <button id="enviarMensajeChat">📤</button>
+      </div>
+    </div>
+  </div>
+  <script type="module"src="chat.js"></script>
   <script type="module" src="main.js"></script>
 </body>
 </html>
