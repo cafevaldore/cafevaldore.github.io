@@ -15,15 +15,18 @@ let pedidosData = [];
 let mensajesData = [];
 let currentTab = 'pedidos';
 
-// Elementos del DOM
+// Elementos del DOM - ACTUALIZADOS PARA LA NUEVA ESTRUCTURA
 const tabButtons = document.querySelectorAll('.tab-btn');
 const tabPanes = document.querySelectorAll('.tab-pane');
 const listaPedidos = document.getElementById('listaPedidosAdmin');
 const listaMensajes = document.getElementById('listaMensajesAdmin');
 const filtroEstado = document.getElementById('filtroEstado');
 const filtroFecha = document.getElementById('filtroFecha');
+
+// BOTÓN ÚNICO DE ACTUALIZAR (movido a tabs)
 const btnActualizar = document.getElementById('btnActualizar');
-const btnActualizarMensajes = document.getElementById('btnActualizarMensajes');
+
+// Elementos de modal
 const modal = document.getElementById('modalPedido');
 const modalBody = document.getElementById('modalPedidoBody');
 const closeModal = document.querySelector('.close');
@@ -75,19 +78,46 @@ function setupEventListeners() {
       }
     });
   });
-// cargarMensajes()
+
   // Filtros
   if (filtroEstado) filtroEstado.addEventListener('change', filtrarPedidos);
   if (filtroFecha) filtroFecha.addEventListener('change', filtrarPedidos);
-  if (btnActualizar) btnActualizar.addEventListener('click', () => {
-    cargarPedidos();
-    cargarMensajes();
-  });
-
-   if (btnActualizarMensajes) btnActualizarMensajes.addEventListener('click', () => {
-    cargarPedidos();
-    cargarMensajes();
-  });
+  
+  // BOTÓN ÚNICO DE ACTUALIZAR - actualiza todo según el tab activo
+  if (btnActualizar) {
+    btnActualizar.addEventListener('click', async () => {
+      try {
+        // Cambiar texto del botón mientras carga
+        const originalText = btnActualizar.innerHTML;
+        btnActualizar.innerHTML = '⏳ Actualizando...';
+        btnActualizar.disabled = true;
+        
+        // Cargar datos
+        await Promise.all([
+          cargarPedidos(),
+          cargarMensajes()
+        ]);
+        
+        // Actualizar estadísticas
+        actualizarEstadisticas();
+        
+        // Mostrar notificación de éxito
+        mostrarNotificacion('Datos actualizados correctamente', 'success');
+        
+        // Restaurar botón
+        btnActualizar.innerHTML = originalText;
+        btnActualizar.disabled = false;
+        
+      } catch (error) {
+        console.error('Error actualizando datos:', error);
+        mostrarError('Error al actualizar los datos');
+        
+        // Restaurar botón
+        btnActualizar.innerHTML = '🔄 Actualizar';
+        btnActualizar.disabled = false;
+      }
+    });
+  }
 
   // Modal
   if (closeModal) closeModal.addEventListener('click', cerrarModal);
@@ -109,11 +139,14 @@ function switchTab(tabName) {
   const activePane = document.getElementById(`tab-${tabName}`);
   if (activePane) activePane.classList.add('active');
   
-  // Cargar contenido específico
+  // Cargar contenido específico si es necesario
   if (tabName === 'pedidos') {
     mostrarTabPedidos();
   } else if (tabName === 'mensajes') {
     mostrarTabMensajes();
+  } else if (tabName === 'chat') {
+    // El chat se maneja en admin-chat.js
+    console.log('Tab de chat activado');
   }
 }
 
@@ -131,7 +164,9 @@ async function cargarPedidos() {
       });
     });
     
-    mostrarTabPedidos();
+    if (currentTab === 'pedidos') {
+      mostrarTabPedidos();
+    }
     
   } catch (error) {
     console.error("Error cargando pedidos:", error);
@@ -195,7 +230,7 @@ function mostrarTabPedidos() {
           <h4>☕ Productos</h4>
           ${(pedido.productos || []).map(producto => `
             <div class="producto-admin-item">
-              <span>${producto.nombre} (${producto.peso || '250g'})</span>
+              <span>${producto.nombre} (${producto.peso || '500g'})</span>
               <span>Cantidad: ${producto.cantidad} - ${formatearPrecio(producto.precio * producto.cantidad)}</span>
             </div>
           `).join('')}
@@ -608,84 +643,6 @@ styleSheet.textContent = `
       opacity: 1;
       transform: translateX(0);
     }
-  }
-  
-  .notificacion-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .notificacion-close {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-  }
-  
-  .badge-nuevo {
-    background: linear-gradient(135deg, #10B981, #059669);
-    color: white;
-    padding: 0.3rem 0.6rem;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 600;
-  }
-  
-  .producto-modal-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background: rgba(218, 165, 32, 0.05);
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
-  }
-  
-  .producto-info h5 {
-    margin: 0 0 0.5rem 0;
-    color: #2F1B14;
-  }
-  
-  .producto-info p {
-    margin: 0.2rem 0;
-    color: #4A5568;
-    font-size: 0.9rem;
-  }
-  
-  .producto-cantidad {
-    text-align: right;
-  }
-  
-  .cantidad {
-    display: block;
-    font-weight: 600;
-    color: #2F1B14;
-  }
-  
-  .subtotal {
-    display: block;
-    font-weight: 700;
-    color: #DAA520;
-    font-size: 1.1rem;
-  }
-  
-  .estados-buttons {
-    display: flex;
-    gap: 0.8rem;
-    flex-wrap: wrap;
-    margin-top: 1rem;
-  }
-  
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin: 1rem 0;
   }
 `;
 
