@@ -23,6 +23,7 @@ const listaMensajes = document.getElementById('listaMensajesAdmin');
 const filtroEstado = document.getElementById('filtroEstado');
 const filtroFecha = document.getElementById('filtroFecha');
 const btnActualizar = document.getElementById('btnActualizar');
+const btnActualizarMensajes = document.getElementById('btnActualizarMensajes');
 const modal = document.getElementById('modalPedido');
 const modalBody = document.getElementById('modalPedidoBody');
 const closeModal = document.querySelector('.close');
@@ -74,11 +75,16 @@ function setupEventListeners() {
       }
     });
   });
-
+// cargarMensajes()
   // Filtros
   if (filtroEstado) filtroEstado.addEventListener('change', filtrarPedidos);
   if (filtroFecha) filtroFecha.addEventListener('change', filtrarPedidos);
   if (btnActualizar) btnActualizar.addEventListener('click', () => {
+    cargarPedidos();
+    cargarMensajes();
+  });
+
+   if (btnActualizarMensajes) btnActualizarMensajes.addEventListener('click', () => {
     cargarPedidos();
     cargarMensajes();
   });

@@ -80,24 +80,31 @@
     </div>
 
     <div class="admin-content">
-      <div class="admin-tabs">
-        <button class="tab-btn active" data-tab="pedidos">📦 Pedidos</button>
-        <button class="tab-btn" data-tab="mensajes">📩 Mensajes</button>
-        <button class="tab-btn" data-tab="chat">💬 Chat Clientes</button>
+      <!-- TABS REESTRUCTURADOS CON BOTÓN DE ACTUALIZAR -->
+      <div class="admin-tabs-container">
+        <div class="admin-tabs">
+          <button class="tab-btn active" data-tab="pedidos">📦 Pedidos</button>
+          <button class="tab-btn" data-tab="mensajes">📩 Mensajes</button>
+          <button class="tab-btn" data-tab="chat">💬 Chat Clientes</button>
+        </div>
+        
+        <div class="admin-actions">
+          <button id="btnActualizar" class="btn-actualizar-tabs">🔄 Actualizar</button>
+        </div>
       </div>
 
       <div class="tab-content">
         <!-- Panel de Pedidos -->
         <div id="tab-pedidos" class="tab-pane active">
-          <div class="filtros-pedidos">
+          <!-- FILTROS SIMPLIFICADOS SIN BOTÓN -->
+          <div class="filtros-pedidos-simple">
             <select id="filtroEstado">
               <option value="todos">Todos los estados</option>
               <option value="pendiente">Pendientes</option>
               <option value="en-proceso">En proceso</option>
               <option value="completado">Completados</option>
             </select>
-            <input type="date" id="filtroFecha">
-            <button id="btnActualizar" class="btn-actualizar">🔄 Actualizar</button>
+            <input type="date" id="filtroFecha" placeholder="Filtrar por fecha">
           </div>
 
           <div class="pedidos-list" id="listaPedidosAdmin">

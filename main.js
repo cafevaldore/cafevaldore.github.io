@@ -15,6 +15,7 @@ let carrito = [];
 let total = 0;
 let usuarioAutenticado = false;
 let currentUserId = null;
+const formularioContacto = document.getElementById('formularioContacto');
 
 // ===== FUNCIONES DEL CARRITO (disponibles globalmente) =====
 window.agregarAlCarrito = function(producto, precio) {
