@@ -500,7 +500,6 @@
 .faq-item.active .faq-toggle {
   transform: rotate(45deg);
 }
-
 /* ===== FOOTER MEJORADO ===== */
 .footer-contacto {
   background: linear-gradient(135deg, #1a0f08 0%, #231a11 35%, #2e2113 70%, #3d2f1e 100%);
@@ -519,7 +518,7 @@
   width: 100%;
   height: 100px;
   background: url("data:image/svg+xml,%3Csvg width='1200' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,50 Q300,20 600,50 T1200,50 V100 H0 Z' fill='%23f5f5f5'/%3E%3C/svg%3E") repeat-x;
-  background-size: 1200px 100px;
+  background-size: cover; /* ✅ Se adapta en móviles */
 }
 
 .footer-contacto::after {
@@ -539,7 +538,7 @@
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* ✅ más flexible */
   gap: 3rem;
   position: relative;
   z-index: 1;
@@ -554,6 +553,8 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  max-width: 100%; /* ✅ no se desborda */
+  box-sizing: border-box; /* ✅ respeta el ancho */
 }
 
 .footer-section::before {
@@ -674,6 +675,19 @@
 .footer-section ul li a:hover::after {
   width: 100%;
 }
+
+/* ✅ Ajustes para móviles */
+@media (max-width: 480px) {
+  .footer-content {
+    grid-template-columns: 1fr; /* una sola columna */
+    gap: 1.5rem;
+  }
+
+  .footer-section {
+    padding: 1rem;
+  }
+}
+
 
 .social-links {
   display: flex;

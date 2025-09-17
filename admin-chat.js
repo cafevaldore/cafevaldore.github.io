@@ -289,6 +289,44 @@ function cargarMensajesConversacion(conversacionId) {
 }
 
 // Agregar mensaje al chat
+// function agregarMensajeAlChat(mensaje) {
+//   if (!chatMessages) return;
+  
+//   // Limpiar mensaje de bienvenida si existe
+//   const welcomeMsg = chatMessages.querySelector('.chat-welcome');
+//   if (welcomeMsg) {
+//     welcomeMsg.remove();
+//   }
+  
+//   const mensajeElement = document.createElement('div');
+//   mensajeElement.className = `mensaje-chat-admin ${mensaje.remitente === 'admin' ? 'mensaje-admin' : 'mensaje-cliente'}`;
+  
+//   const fecha = mensaje.fecha?.toDate ? mensaje.fecha.toDate() : new Date();
+//   const fechaFormateada = fecha.toLocaleTimeString('es-CO', { 
+//     hour: '2-digit', 
+//     minute: '2-digit' 
+//   });
+  
+//   const esAdmin = mensaje.remitente === 'admin';
+  
+//   mensajeElement.innerHTML = `
+//     <div class="mensaje-contenido-admin">
+//       <div class="mensaje-avatar">
+//         ${esAdmin ? '👨‍💼' : '👤'}
+//       </div>
+//       <div class="mensaje-texto">
+//         <div class="mensaje-header-admin">
+//           <span class="remitente">${esAdmin ? 'Tú (Admin)' : 'Cliente'}</span>
+//           <span class="mensaje-hora">${fechaFormateada}</span>
+//         </div>
+//         <p>${mensaje.contenido}</p>
+//       </div>
+//     </div>
+//   `;
+  
+//   chatMessages.appendChild(mensajeElement);
+// }
+// Agregar mensaje al chat
 function agregarMensajeAlChat(mensaje) {
   if (!chatMessages) return;
   
@@ -299,15 +337,17 @@ function agregarMensajeAlChat(mensaje) {
   }
   
   const mensajeElement = document.createElement('div');
-  mensajeElement.className = `mensaje-chat-admin ${mensaje.remitente === 'admin' ? 'mensaje-admin' : 'mensaje-cliente'}`;
+  const esAdmin = mensaje.remitente === 'admin';
+  
+  // Añadir clase mensaje-largo si el contenido es extenso
+  const esMensajeLargo = mensaje.contenido.length > 200;
+  mensajeElement.className = `mensaje-chat-admin ${esAdmin ? 'mensaje-admin' : 'mensaje-cliente'} ${esMensajeLargo ? 'mensaje-largo' : ''}`;
   
   const fecha = mensaje.fecha?.toDate ? mensaje.fecha.toDate() : new Date();
   const fechaFormateada = fecha.toLocaleTimeString('es-CO', { 
     hour: '2-digit', 
     minute: '2-digit' 
   });
-  
-  const esAdmin = mensaje.remitente === 'admin';
   
   mensajeElement.innerHTML = `
     <div class="mensaje-contenido-admin">

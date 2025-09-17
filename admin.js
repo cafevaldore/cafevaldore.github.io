@@ -335,7 +335,7 @@ window.abrirModalPedido = function(pedidoId) {
             <div class="producto-modal-item">
               <div class="producto-info">
                 <h5>${producto.producto}</h5>
-                <p>Peso: 250g</p>
+                <p>Peso: 500g</p>
                 <p>Precio unitario: ${formatearPrecio(producto.precio)}</p>
               </div>
               <div class="producto-cantidad">

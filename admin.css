@@ -972,249 +972,610 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Chat area */
-.chat-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
+/* ==================== */
+/* ESTILOS MEJORADOS PARA EL CHAT */
+/* ==================== */
 
-.chat-header {
-  padding: 1rem;
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+        /* ESTILOS GENERALES */
+        /* * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f2eb;
+            color: #2F1B14;
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        } */
+        
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 80vh;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(139, 69, 19, 0.15);
+            overflow: hidden;
+            display: flex;
+        }
+        
+        /* Sidebar de conversaciones */
+        .conversaciones-sidebar {
+            width: 300px;
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Previene desbordamiento */
+        }
+        
+        .sidebar-header {
+            padding: 1rem;
+            background: linear-gradient(135deg, #2F1B14, #4A5568);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0; /* Evita que se encoja */
+        }
+        
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .conversaciones-filtros {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            border-bottom: 1px solid #e2e8f0;
+            flex-shrink: 0; /* Evita que se encoja */
+        }
+        
+        .conversaciones-filtros input,
+        .conversaciones-filtros select {
+            padding: 0.8rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.2s ease;
+            width: 100%; /* Asegura que no se desborden */
+        }
+        
+        .conversaciones-lista {
+            flex: 1;
+            overflow-y: auto; /* Scroll interno si es necesario */
+            padding: 0.5rem;
+        }
+        
+        .conversacion-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 0.8rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .conversacion-item:hover {
+            background: #f1f5f9;
+        }
+        
+        .conversacion-item.activa {
+            background: linear-gradient(135deg, #DAA520, #B8860B);
+            color: white;
+        }
+        
+        .conversacion-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(218, 165, 32, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0; /* Evita que se encoja */
+        }
+        
+        .conversacion-info {
+            flex: 1;
+            min-width: 0; /* IMPORTANTE: Permite que el texto se ajuste */
+        }
+        
+        .conversacion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.3rem;
+        }
+        
+        .conversacion-header h4 {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap; /* Evita que el texto se desborde */
+            max-width: 150px; /* Limita el ancho del texto */
+        }
+        
+        .conversacion-tiempo {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+        
+        .conversacion-preview {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap; /* Evita que el texto se desborde */
+        }
+        
+        /* Chat area - SOLUCIÓN AL DESBORDAMIENTO */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0; /* IMPORTANTE: Previene desbordamiento */
+        }
+        
+        .chat-header {
+            padding: 1rem;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0; /* Evita que se encoja */
+        }
+        
+        .cliente-info {
+            min-width: 0; /* IMPORTANTE: Permite que el texto se ajuste */
+        }
+        
+        .cliente-info h4 {
+            margin: 0 0 0.2rem 0;
+            color: #2F1B14;
+            font-size: 1.1rem;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap; /* Evita que el texto se desborde */
+            max-width: 200px; /* Limita el ancho del texto */
+        }
+        
+        .cliente-info span {
+            color: #64748b;
+            font-size: 0.9rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap; /* Evita que el texto se desborde */
+            display: block;
+            max-width: 200px; /* Limita el ancho del texto */
+        }
+        
+        .chat-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #059669;
+            flex-shrink: 0; /* Evita que se encoja */
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10B981;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 0; /* IMPORTANTE: Previene desbordamiento */
+        }
+        
+        .chat-welcome {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+        }
+        
+        /* MENSAJES DEL CHAT - ESTRUCTURA MEJORADA */
+        .mensaje-chat-admin {
+            display: flex;
+            width: 100%;
+            min-width: 0; /* IMPORTANTE: Previene desbordamiento */
+        }
+        
+        .mensaje-contenido-admin {
+            display: flex;
+            gap: 0.8rem;
+            max-width: 85%;
+            min-width: 0; /* IMPORTANTE: Previene desbordamiento */
+        }
+        
+        /* MENSAJES DEL CLIENTE - A LA IZQUIERDA */
+        .mensaje-chat-admin.mensaje-cliente {
+            justify-content: flex-start;
+        }
+        
+        .mensaje-chat-admin.mensaje-cliente .mensaje-contenido-admin {
+            align-self: flex-start;
+            flex-direction: row;
+        }
+        
+        /* MENSAJES DEL ADMIN - A LA DERECHA */
+        .mensaje-chat-admin.mensaje-admin {
+            justify-content: flex-end;
+        }
+        
+        .mensaje-chat-admin.mensaje-admin .mensaje-contenido-admin {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        
+        /* AVATARES DE LOS MENSAJES */
+        .mensaje-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+        
+        .mensaje-chat-admin.mensaje-cliente .mensaje-avatar {
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            color: white;
+        }
+        
+        .mensaje-chat-admin.mensaje-admin .mensaje-avatar {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+        }
+        
+        /* CONTENIDO DE LOS MENSAJES */
+        .mensaje-texto {
+            flex: 1;
+            min-width: 0; /* IMPORTANTE: Permite que el texto se ajuste */
+        }
+        
+        .mensaje-header-admin {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.3rem;
+            gap: 0.5rem;
+        }
+        
+        .remitente {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #4a5568;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap; /* Evita que el texto se desborde */
+            max-width: 120px; /* Limita el ancho del texto */
+        }
+        
+        .mensaje-hora {
+            font-size: 0.75rem;
+            color: #a0aec0;
+            flex-shrink: 0; /* Evita que se encoja */
+        }
+        
+        /* BURBUJA DEL MENSAJE - MEJORADA PARA TEXTO LARGO */
+        .mensaje-texto p {
+            margin: 0;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.4;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 100%; /* Aseguramos que no se desborde */
+            overflow: hidden; /* Ocultamos el desbordamiento */
+        }
+        
+        /* MEJORA: Permitir scroll en mensajes muy largos */
+        .mensaje-largo p {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        /* Burbuja del cliente */
+        .mensaje-chat-admin.mensaje-cliente .mensaje-texto p {
+            background: white;
+            color: #2d3748;
+            border-bottom-left-radius: 4px;
+        }
+        
+        /* Burbuja del admin */
+        .mensaje-chat-admin.mensaje-admin .mensaje-texto p {
+            background: linear-gradient(135deg, #DAA520, #DAA510);
+            color: white;
+            border: none;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .chat-input-container {
+            border-top: 1px solid #e2e8f0;
+            background: white;
+            padding: 1rem;
+            flex-shrink: 0; /* Evita que se encoja */
+        }
+        
+        .chat-input-area {
+            display: flex;
+            gap: 0.8rem;
+            align-items: flex-end;
+        }
+        
+        #mensajeAdmin {
+            flex: 1;
+            min-height: 44px;
+            max-height: 120px;
+            padding: 0.8rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            resize: none;
+            transition: all 0.2s ease;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        
+        .btn-enviar {
+            background: linear-gradient(135deg, #DAA520, #B8860B);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0; /* Evita que se encoja */
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chat-container {
+                flex-direction: column;
+                height: 90vh;
+            }
+            
+            .conversaciones-sidebar {
+                width: 100%;
+                max-height: 40%;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            
+            .conversacion-header h4 {
+                max-width: 120px;
+            }
+            
+            .cliente-info h4,
+            .cliente-info span {
+                max-width: 150px;
+            }
+            
+            .mensaje-contenido-admin {
+                max-width: 95%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .conversacion-header h4 {
+                max-width: 100px;
+            }
+            
+            .cliente-info h4,
+            .cliente-info span {
+                max-width: 120px;
+            }
+            
+            .remitente {
+                max-width: 80px;
+            }
+        }
 
-.cliente-info h4 {
-  margin: 0 0 0.2rem 0;
-  color: #2F1B14;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
 
-.cliente-info span {
-  color: #64748b;
-  font-size: 0.9rem;
-}
 
-.chat-status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #059669;
-}
 
-.status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #10B981;
-}
 
-.status-indicator.online {
-  background: #10B981;
-  animation: pulse 2s infinite;
-}
 
-.chat-messages {
-  flex: 1;
-  padding: 1rem;
-  overflow-y: auto;
-  background: #fafafa;
-  scroll-behavior: smooth;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
 
-.chat-welcome {
-  text-align: center;
-  padding: 2rem;
-  color: #64748b;
-}
 
-.chat-welcome p {
-  margin: 0.5rem 0;
-}
+/*Prueba de código para que funcione en móviles*/
 
-/* MENSAJES DEL CHAT - ESTRUCTURA MEJORADA */
-.mensaje-chat-admin {
-  margin-bottom: 1rem;
-  animation: fadeInMessage 0.3s ease;
-  display: flex;
-  width: 100%;
-}
+        /* ========================================== */
+        /* SOLUCIONES ESPECÍFICAS PARA MÓVILES */
+        /* Agrega estos estilos a tu archivo admin.css */
+        /* ========================================== */
+        
+        /* 1. MEJORAS RESPONSIVE PARA EL CONTENEDOR PRINCIPAL */
+        @media (max-width: 768px) {
+            .chat-admin-container {
+                flex-direction: column;
+                height: calc(100vh - 180px) !important;
+            }
+            
+            .conversaciones-sidebar {
+                width: 100% !important;
+                max-height: 40% !important;
+                border-right: none !important;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            
+            .chat-area {
+                width: 100% !important;
+                display: none;
+            }
+            
+            .chat-area.activa {
+                display: flex !important;
+            }
+            
+            .conversaciones-sidebar.oculta {
+                display: none !important;
+            }
+        }
+        
+        /* 2. BOTÓN DE VOLVER PARA MÓVIL */
+        .btn-volver-mobile {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .btn-volver-mobile {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: none;
+                border: none;
+                color: #2F1B14;
+                font-size: 1.5rem;
+                margin-right: 10px;
+                cursor: pointer;
+            }
+            
+            .chat-header {
+                padding: 0.8rem !important;
+            }
+        }
+        
+        /* 3. MEJORAS DE SCROLL PARA DISPOSITIVOS MÓVILES */
+        .conversaciones-lista,
+        .chat-messages {
+            -webkit-overflow-scrolling: touch !important; /* Scroll suave en iOS */
+            overflow-scrolling: touch !important;
+        }
+        
+        /* 4. AJUSTES DE TAMAÑO PARA ELEMENTOS TÁCTILES */
+        @media (max-width: 768px) {
+            .conversacion-item {
+                padding: 12px 10px !important;
+                min-height: 60px !important; /* Altura mínima para fácil tapping */
+            }
+            
+            .btn-enviar {
+                min-width: 50px !important;
+                min-height: 50px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            
+            /* Asegurar que los inputs sean fácilmente seleccionables */
+            .conversaciones-filtros input,
+            .conversaciones-filtros select,
+            #mensajeAdmin {
+                font-size: 16px !important; /* Previene zoom en iOS */
+                min-height: 44px !important; /* Altura mínima para tapping */
+            }
+        }
+        
+        /* 5. PREVENCIÓN DE ZOOM NO DESEADO EN iOS */
+        @media (max-width: 768px) {
+            .conversaciones-filtros input:focus,
+            #mensajeAdmin:focus {
+                font-size: 16px !important;
+            }
+        }
+        
+        /* 6. SOPORTE PARA DISPOSITIVOS CON NOTCH (MARCADOR) */
+        /* Asegura que el contenido no quede oculto detrás del notch */
+        @supports (padding: max(0px)) {
+            .admin-header,
+            .admin-tabs {
+                padding-left: max(15px, env(safe-area-inset-left)) !important;
+                padding-right: max(15px, env(safe-area-inset-right)) !important;
+            }
+            
+            .chat-admin-container {
+                padding-bottom: env(safe-area-inset-bottom) !important;
+            }
+        }
+        
+        /* 7. MEJORAS VISUALES PARA MÓVILES */
+        @media (max-width: 768px) {
+            .conversacion-header h4 {
+                font-size: 0.9rem !important;
+                max-width: 70% !important;
+            }
+            
+            .cliente-info h4 {
+                font-size: 1rem !important;
+                max-width: 60% !important;
+            }
+            
+            .cliente-info span {
+                font-size: 0.8rem !important;
+                max-width: 60% !important;
+            }
+            
+            .mensaje-contenido-admin {
+                max-width: 90% !important;
+            }
+            
+            .mensaje-texto p {
+                font-size: 0.9rem !important;
+                padding: 0.7rem !important;
+            }
+        }
+        
+        /* 8. ESTADOS DE CARGA MEJORADOS PARA MÓVIL */
+        @media (max-width: 768px) {
+            .loading-conversaciones,
+            .empty-conversaciones {
+                padding: 2rem 1rem !important;
+                text-align: center;
+            }
+        }
 
-.mensaje-contenido-admin {
-  display: flex;
-  gap: 0.8rem;
-  max-width: 85%;
-  align-items: flex-end;
-}
 
-/* MENSAJES DEL CLIENTE - A LA IZQUIERDA */
-.mensaje-chat-admin.mensaje-cliente {
-  justify-content: flex-start;
-}
-
-.mensaje-chat-admin.mensaje-cliente .mensaje-contenido-admin {
-  align-self: flex-start;
-  flex-direction: row; /* Avatar a la izquierda, mensaje a la derecha */
-}
-
-/* MENSAJES DEL ADMIN - A LA DERECHA */
-.mensaje-chat-admin.mensaje-admin {
-  justify-content: flex-end;
-}
-
-.mensaje-chat-admin.mensaje-admin .mensaje-contenido-admin {
-  align-self: flex-end;
-  flex-direction: row-reverse; /* Avatar a la derecha, mensaje a la izquierda */
-}
-
-/* AVATARES DE LOS MENSAJES */
-.mensaje-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  flex-shrink: 0;
-  font-weight: 600;
-}
-
-/* Avatar del cliente - emoji 👤 en azul */
-.mensaje-chat-admin.mensaje-cliente .mensaje-avatar {
-  background: linear-gradient(135deg, #3B82F6, #2563EB);
-  color: white;
-}
-
-.mensaje-chat-admin.mensaje-cliente .mensaje-avatar::before {
-  content: '👤';
-}
-
-/* Avatar del admin - emoji ⚙️ en verde */
-.mensaje-chat-admin.mensaje-admin .mensaje-avatar {
-  background: linear-gradient(135deg, #10B981, #059669);
-  color: white;
-}
-
-.mensaje-chat-admin.mensaje-admin .mensaje-avatar::before {
-  content: '⚙️';
-}
-
-/* CONTENIDO DE LOS MENSAJES */
-.mensaje-texto {
-  flex: 1;
-  min-width: 0;
-}
-
-.mensaje-header-admin {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.3rem;
-  gap: 0.5rem;
-}
-
-.remitente {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #4a5568;
-}
-
-.mensaje-chat-admin.mensaje-admin .remitente {
-  color: #DAA520;
-}
-
-.mensaje-hora {
-  font-size: 0.75rem;
-  color: #a0aec0;
-}
-
-/* BURBUJA DEL MENSAJE */
-.mensaje-texto p {
-  margin: 0;
-  padding: 0.8rem 1rem;
-  border-radius: 12px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  word-wrap: break-word;
-  line-height: 1.4;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* Burbuja del cliente */
-.mensaje-chat-admin.mensaje-cliente .mensaje-texto p {
-  background: white;
-  color: #2d3748;
-  border-bottom-left-radius: 4px;
-}
-
-/* Burbuja del admin */
-.mensaje-chat-admin.mensaje-admin .mensaje-texto p {
-  background: linear-gradient(135deg, #DAA520, #DAA510);
-  color: white;
-  border: none;
-  border-bottom-right-radius: 4px;
-}
-
-.chat-input-container {
-  border-top: 1px solid #e2e8f0;
-  background: white;
-  padding: 1rem;
-}
-
-.chat-input-area {
-  display: flex;
-  gap: 0.8rem;
-  align-items: flex-end;
-}
-
-#mensajeAdmin {
-  flex: 1;
-  min-height: 44px;
-  max-height: 120px;
-  padding: 0.8rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-family: inherit;
-  resize: none;
-  transition: all 0.2s ease;
-}
-
-#mensajeAdmin:focus {
-  outline: none;
-  border-color: #DAA520;
-  box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.1);
-}
-
-.btn-enviar {
-  background: linear-gradient(135deg, #DAA520, #B8860B);
-  color: white;
-  border: none;
-  padding: 0.8rem 1.2rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-enviar:hover {
-  background: linear-gradient(135deg, #B8860B, #996515);
-  transform: translateY(-1px);
-}
 
 /* ============================================
    RESPONSIVE DESIGN
    ============================================ */
+/* Responsive */
+@media (max-width: 768px) {
+  .mensaje-contenido-admin {
+    max-width: 95%;
+  }
+}
+
 @media (max-width: 768px) {
   .admin-container {
     padding: 1rem;

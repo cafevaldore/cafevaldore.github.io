@@ -62,7 +62,7 @@
       <h2>📦 Mis Pedidos</h2>
       <div id="pedidosContainer">
         <div class="loading">
-          Cargando tus pedidos...
+          Cargando tus pedidos... Por favor verifique que inició sesión.
         </div>
       </div>
     </section>
@@ -149,6 +149,17 @@
       </div>
     </div>
   </div>
+  <!-- Mensaje para usuarios no autenticados en chat-->
+    <div id="loginChat" class="login-required" style="display: none;">
+      <div class="message-box">
+        <h3>🔐 Inicia sesión para chatear</h3>
+        <p>Para poder usar el chat de café valdore, necesitas tener una cuenta.</p>
+        <button onclick="window.location.href='auth.html'" class="login-prompt-btn">
+          Iniciar Sesión / Registrarse
+        </button>
+      </div>
+    </div>
   <script type="module"src="chat.js"></script>
+  <script type="module"src="main.js"></script>
 </body>
 </html>

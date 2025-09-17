@@ -64,7 +64,7 @@
       <h2>Nuestros Cafés Especiales</h2>
       <div class="productos-grid">
         <div class="producto">
-          <img src="bourbon.jpeg" alt="Bourbon Rosado">
+          <img src="bourbon.jpg" alt="Bourbon Rosado">
           <h3>Bourbon Rosado 500g</h3>
           <p>Café de tueste medio, con cuerpo ligero y sedoso. Presenta un perfil frutal y floral, con notas de cereza, fresa y miel, que se combinan con una dulzura natural que envuelve el paladar. Ideal para quienes disfrutan de un café delicado, aromático y equilibrado, que despierta los sentidos sin ser agresivo.</p>
           <button class="add-to-cart-btn" data-producto="Bourbon Rosado" data-precio="50000">
@@ -72,11 +72,36 @@
           </button>
         </div>
         <div class="producto">
-          <img src="caturra.jpeg" alt="Caturra">
+          <img src="caturra.jpg" alt="Caturra">
           <h3>Caturra 500g</h3>
-          <p>Café de tueste medio, con cuerpo medio y textura cremosa. Destaca por su equilibrio entre acidez brillante y notas dulces, acompañadas de un aroma intenso a frutos secos y cacao. Una experiencia envolvente y compleja, ideal para quienes buscan un café aromático, con carácter y un sabor persistente en cada taza.</p>
+          <p>Café de tueste medio, con cuerpo medio y textura cremosa. Destaca por su equilibrio entre acidez brillante y notas dulces, acompañadas de un aroma intenso a frutos secos y cacao. Una experiencia envolvente y compleja, ideal para quienes buscan un café aromático, con carácter y un sabor persistente.</p>
           <button class="add-to-cart-btn" data-producto="Caturra" data-precio="50000">
             Agregar al Carrito • $50.000
+          </button>
+        </div>
+        <div class="producto">
+          <img src="promocion.png" alt="Promoción Bourbon + Caturra">
+          <h3>Gran Promoción Bourbon + Caturra 1000g</h3>
+          <p>🔥 Descubre el balance perfecto con nuestra combinación exclusiva de Bourbon y Caturra, dos cafés de origen único que conquistan por su cuerpo medio, notas dulces y final cremoso.
+Un café premium, aromático y sofisticado para quienes disfrutan la excelencia en cada sorbo.
+</p>
+<p>🌎El café que transforma cada momento en especial.</p>
+<p>🌟 El equilibrio perfecto en cada taza</p>
+<p>☕ Dos orígenes, un sabor premium</p>
+          <button class="add-to-cart-btn" data-producto="Promoción Bourbon + Caturra" data-precio="80000">
+            Agregar al Carrito • $80.000
+          </button>
+        </div>
+        <div class="producto">
+          <img src="superpromocion.png" alt="Super Promoción Bourbon + Caturra X2">
+          <h3>Super Promoción 2 bolsas de Bourbon + 2 bolsas de Caturra 2000g</h3>
+          <p>🔥 Lleva el doble y ahorra más con esta super promoción familiar: 2 bolsas de Bourbon y 2 bolsas de Caturra, 2000g de café selecto para que nunca falte en casa. Vive una experiencia intensa y envolvente, con aromas de frutos secos, cacao y notas brillantes que harán de cada preparación un momento especial.
+👉 Más café, más sabor, más ahorro.</p>
+<p>🔥 Más café, más sabor, más ahorro
+</p>
+<p>🎉 2 + 2: la experiencia completa del café premium</p>
+          <button class="add-to-cart-btn" data-producto="Super Promoción Bourbon + Caturra X2" data-precio="100000">
+            Agregar al Carrito • $100.000
           </button>
         </div>
       </div>
@@ -87,6 +112,17 @@
       <div class="message-box">
         <h3>🔐 Inicia sesión para comprar</h3>
         <p>Para agregar productos al carrito y realizar pedidos, necesitas tener una cuenta.</p>
+        <button onclick="window.location.href='auth.html'" class="login-prompt-btn">
+          Iniciar Sesión / Registrarse
+        </button>
+      </div>
+    </div>
+
+    <!-- Mensaje para usuarios no autenticados en chat-->
+    <div id="loginChat" class="login-required" style="display: none;">
+      <div class="message-box">
+        <h3>🔐 Inicia sesión para chatear</h3>
+        <p>Para poder usar el chat de café valdore, necesitas tener una cuenta.</p>
         <button onclick="window.location.href='auth.html'" class="login-prompt-btn">
           Iniciar Sesión / Registrarse
         </button>

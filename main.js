@@ -16,6 +16,18 @@ let total = 0;
 let usuarioAutenticado = false;
 let currentUserId = null;
 const formularioContacto = document.getElementById('formularioContacto');
+const enviarmensajechat = document.getElementById('enviarMensajeChat'); //Para solucionar, debo verificar que esté registrado para dejarlo enviar mensaje
+
+//Verificar si se ha iniciado sesión antes de enviar mensaje en el chat
+    // Agregamos el evento "click"
+    enviarmensajechat.addEventListener("click", function() {
+      // Aquí puedes poner la condición o el mensaje que quieras
+       if (!usuarioAutenticado) {
+    mostrarLoginChat();
+    return;
+  }
+    });
+
 
 // ===== FUNCIONES DEL CARRITO (disponibles globalmente) =====
 window.agregarAlCarrito = function(producto, precio) {
@@ -107,6 +119,25 @@ function mostrarLoginMessage() {
     const hideMessage = (e) => {
       if (e.target === loginMessage) {
         loginMessage.style.display = "none";
+        document.removeEventListener('click', hideMessage);
+      }
+    };
+    
+    setTimeout(() => {
+      document.addEventListener('click', hideMessage);
+    }, 100);
+  }
+}
+
+function mostrarLoginChat() {
+  const loginchat = document.getElementById("loginChat");
+  if (loginchat) {
+    loginchat.style.display = "flex";
+    
+    // Auto-ocultar después de 5 segundos si se hace click fuera
+    const hideMessage = (e) => {
+      if (e.target === loginchat) {
+        loginchat.style.display = "none";
         document.removeEventListener('click', hideMessage);
       }
     };
