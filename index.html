@@ -14,7 +14,9 @@
   <!-- Header con menú responsive -->
   <header>
     <nav>
-      <a href="#" class="logo">☕ Café Valdore</a>
+      <a href="#" class="logo">
+  <img src="logo.png" alt="Café Valdore" style="height: 120px;">
+</a>
       
       <!-- Menú desktop -->
       <ul class="nav-links">
@@ -306,7 +308,7 @@ Un café premium, aromático y sofisticado para quienes disfrutan la excelencia 
   <div class="chat-container" id="chatContainer">
     <button class="chat-toggle" id="chatToggle">
       💬
-      <span class="chat-badge" id="chatBadge">0</span>
+      <span class="chat-badge" id="chatBadge" style="display: none;">0</span>
     </button>
     
     <div class="chat-window" id="chatWindow">
@@ -329,7 +331,8 @@ Un café premium, aromático y sofisticado para quienes disfrutan la excelencia 
       </div>
     </div>
   </div>
-  <script type="module"src="chat.js"></script>
-  <script type="module" src="main.js"></script>
+  <script type="module" src="firebaseconfig.js"></script>
+<script type="module" src="main.js"></script>
+<script type="module" src="chat.js"></script>
 </body>
 </html>

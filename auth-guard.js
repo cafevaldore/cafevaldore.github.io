@@ -1,59 +1,64 @@
-// auth-guard.js - Protección para páginas de administrador mejorado
+// auth-guard.js - Protección segura con Firebase Authentication
+import { auth } from './firebaseconfig.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const ADMIN_EMAILS = [
+  'jarolmedina41@gmail.com'
+];
+
+// Limpiar localStorage obsoleto (solo una vez)
+if (localStorage.getItem('isAdmin')) {
+  localStorage.removeItem('isAdmin');
+  localStorage.removeItem('adminEmail');
+  localStorage.removeItem('adminUID');
+  console.log('✅ localStorage obsoleto limpiado');
+}
 
 // Verificar autenticación de administrador
 function verificarAccesoAdmin() {
-  const isAdmin = localStorage.getItem('isAdmin');
-  const adminEmail = localStorage.getItem('adminEmail');
-  
-  // Lista de emails autorizados (debe coincidir con login)
-  const ADMIN_EMAILS = [
-    'jarolmedina41@gmail.com',
-    'administrador@cafevaldore.com',
-    'tu-email@gmail.com', // Reemplaza con tu email
-  ];
-  
-  // Si no está logueado o no tiene email autorizado
-  if (!isAdmin || isAdmin !== 'true' || !adminEmail || !ADMIN_EMAILS.includes(adminEmail.toLowerCase())) {
-    // Limpiar datos inválidos
-    localStorage.removeItem('isAdmin');
-    localStorage.removeItem('adminEmail');
-    localStorage.removeItem('adminUID');
-    
-    // Mostrar notificación y redireccionar
-    showAuthNotification('Sesión expirada. Redirigiendo al login...', 'warning');
-    setTimeout(() => {
-      window.location.href = 'admin-login.html';
-    }, 2000);
-    return false;
-  }
-  
-  return true;
+  return new Promise((resolve) => {
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        showAuthNotification('Debes iniciar sesión', 'warning');
+        setTimeout(() => {
+          window.location.href = 'admin-login.html';
+        }, 2000);
+        resolve(false);
+        return;
+      }
+
+      if (!ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+        showAuthNotification('No tienes permisos de administrador', 'error');
+        auth.signOut();
+        setTimeout(() => {
+          window.location.href = 'admin-login.html';
+        }, 2000);
+        resolve(false);
+        return;
+      }
+
+      resolve(true);
+    });
+  });
 }
 
-// Función mejorada para cerrar sesión (sin confirmación)
+// Cerrar sesión
 function cerrarSesionAdmin() {
-  // Mostrar notificación de proceso
   showAuthNotification('Cerrando sesión...', 'info');
   
-  // Limpiar localStorage después de un breve delay
-  setTimeout(() => {
-    localStorage.removeItem('isAdmin');
-    localStorage.removeItem('adminEmail');
-    localStorage.removeItem('adminUID');
-    
-    // Mostrar notificación de éxito
-    showAuthNotification('Sesión cerrada exitosamente. ¡Hasta pronto!', 'success');
-    
-    // Redireccionar después de mostrar la notificación
+  auth.signOut().then(() => {
+    showAuthNotification('Sesión cerrada exitosamente', 'success');
     setTimeout(() => {
       window.location.href = 'admin-login.html';
-    }, 2000);
-  }, 500);
+    }, 1500);
+  }).catch((error) => {
+    console.error('Error al cerrar sesión:', error);
+    showAuthNotification('Error al cerrar sesión', 'error');
+  });
 }
 
 // Configurar botones de logout
 function configurarLogout() {
-  // Buscar botones de logout
   const logoutButtons = document.querySelectorAll('#authBtn, #authMobileBtn, .auth-btn');
   
   logoutButtons.forEach(button => {
@@ -67,60 +72,42 @@ function configurarLogout() {
   });
 }
 
-// Mostrar información del admin logueado
+// Mostrar información del admin
 function mostrarInfoAdmin() {
-  const adminEmail = localStorage.getItem('adminEmail');
-  
-  if (adminEmail) {
-    // Buscar elementos para mostrar info del admin
-    const adminInfoElements = document.querySelectorAll('.admin-info, .user-welcome');
-    
-    adminInfoElements.forEach(element => {
-      if (element) {
-        element.innerHTML = `
-          <span style="color: #DAA520; font-weight: 600;">
-            👤 Administrador: ${adminEmail}
-          </span>
+  onAuthStateChanged(auth, (user) => {
+    if (user && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+      const adminInfoElements = document.querySelectorAll('.admin-info, .user-welcome');
+      
+      adminInfoElements.forEach(element => {
+        if (element) {
+          element.innerHTML = `
+            <span style="color: #DAA520; font-weight: 600;">
+              👤 Administrador: ${user.email}
+            </span>
+          `;
+          element.style.display = 'block';
+        }
+      });
+
+      const pageTitle = document.querySelector('.admin-header h1, .presentacion h2');
+      if (pageTitle && pageTitle.textContent.includes('Bienvenido')) {
+        pageTitle.innerHTML = `
+          Bienvenido, Administrador
+          <br><small style="font-size: 0.6em; color: #4A5568;">${user.email}</small>
         `;
-        element.style.display = 'block';
       }
-    });
-    
-    // Actualizar título de la página si existe
-    const pageTitle = document.querySelector('.admin-header h1, .presentacion h2');
-    if (pageTitle && pageTitle.textContent.includes('Bienvenido')) {
-      pageTitle.innerHTML = `
-        Bienvenido, Administrador
-        <br><small style="font-size: 0.6em; color: #4A5568;">${adminEmail}</small>
-      `;
     }
-  }
+  });
 }
 
-// Verificar periódicamente la sesión
-function verificarSesionPeriodicamente() {
-  setInterval(() => {
-    const isAdmin = localStorage.getItem('isAdmin');
-    if (!isAdmin || isAdmin !== 'true') {
-      showAuthNotification('Sesión perdida. Redirigiendo...', 'warning');
-      setTimeout(() => {
-        window.location.href = 'admin-login.html';
-      }, 2000);
-    }
-  }, 60000); // Verificar cada 60 segundos
-}
-
-// Función para mostrar notificaciones elegantes de autenticación
+// Función para mostrar notificaciones
 function showAuthNotification(mensaje, tipo = 'info') {
-  // Remover notificaciones anteriores
   const existingNotifications = document.querySelectorAll('.auth-notification');
   existingNotifications.forEach(notif => notif.remove());
   
-  // Crear elemento de notificación
   const notification = document.createElement('div');
   notification.className = `auth-notification ${tipo}`;
   
-  // Obtener icono según el tipo
   const icons = {
     'success': '✅',
     'error': '❌', 
@@ -137,7 +124,6 @@ function showAuthNotification(mensaje, tipo = 'info') {
     <div class="auth-notification-progress"></div>
   `;
   
-  // Estilos inline para la notificación
   const colors = {
     'success': {
       bg: 'linear-gradient(135deg, #10B981, #059669)',
@@ -174,10 +160,8 @@ function showAuthNotification(mensaje, tipo = 'info') {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   `;
   
-  // Agregar al DOM
   document.body.appendChild(notification);
   
-  // Configurar la barra de progreso
   const progressBar = notification.querySelector('.auth-notification-progress');
   let duration = tipo === 'info' ? 3000 : 4000;
   
@@ -191,7 +175,6 @@ function showAuthNotification(mensaje, tipo = 'info') {
     animation: shrinkProgress ${duration}ms linear;
   `;
   
-  // Configurar cierre automático
   const autoClose = setTimeout(() => {
     if (notification.parentNode) {
       notification.style.animation = 'slideOutRight 0.4s ease-in-out';
@@ -199,7 +182,6 @@ function showAuthNotification(mensaje, tipo = 'info') {
     }
   }, duration);
   
-  // Configurar cierre manual
   const closeBtn = notification.querySelector('.auth-notification-close');
   closeBtn.addEventListener('click', () => {
     clearTimeout(autoClose);
@@ -208,69 +190,46 @@ function showAuthNotification(mensaje, tipo = 'info') {
   });
 }
 
-// Inicializar protección cuando se carga la página
-document.addEventListener('DOMContentLoaded', function() {
-  // Solo verificar en páginas de admin
+// Inicializar
+document.addEventListener('DOMContentLoaded', async function() {
   const isAdminPage = window.location.pathname.includes('admin') &&
                       !window.location.pathname.includes('admin-login');
   
   if (isAdminPage) {
-    // Verificar acceso
-    if (verificarAccesoAdmin()) {
-      // Configurar logout
+    const tieneAcceso = await verificarAccesoAdmin();
+    
+    if (tieneAcceso) {
       configurarLogout();
-      
-      // Mostrar info del admin
       mostrarInfoAdmin();
       
-      // Iniciar verificación periódica
-      verificarSesionPeriodicamente();
-      
-      // Mostrar notificación de bienvenida
-      const adminEmail = localStorage.getItem('adminEmail');
-      showAuthNotification(`Bienvenido de vuelta, ${adminEmail}`, 'success');
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          showAuthNotification(`Bienvenido, ${user.email}`, 'success');
+        }
+      });
       
       console.log('✅ Acceso de administrador verificado');
     }
   }
 });
 
-// CSS para las notificaciones de autenticación
+// CSS
 const authNotificationStyles = document.createElement('style');
 authNotificationStyles.textContent = `
   @keyframes slideInBounce {
-    0% {
-      opacity: 0;
-      transform: translateX(400px) scale(0.8);
-    }
-    50% {
-      opacity: 0.8;
-      transform: translateX(-20px) scale(1.05);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-    }
+    0% { opacity: 0; transform: translateX(400px) scale(0.8); }
+    50% { opacity: 0.8; transform: translateX(-20px) scale(1.05); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
   }
   
   @keyframes slideOutRight {
-    0% {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-    }
-    100% {
-      opacity: 0;
-      transform: translateX(400px) scale(0.8);
-    }
+    0% { opacity: 1; transform: translateX(0) scale(1); }
+    100% { opacity: 0; transform: translateX(400px) scale(0.8); }
   }
   
   @keyframes shrinkProgress {
-    0% {
-      width: 100%;
-    }
-    100% {
-      width: 0%;
-    }
+    0% { width: 100%; }
+    100% { width: 0%; }
   }
   
   .auth-notification-content {
@@ -316,15 +275,10 @@ authNotificationStyles.textContent = `
   }
   
   @keyframes pulse {
-    0%, 100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.1);
-    }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
   }
   
-  /* Mejorar los botones de autenticación */
   .auth-btn {
     background: linear-gradient(135deg, #DC2626, #B91C1C);
     color: white;
@@ -348,12 +302,6 @@ authNotificationStyles.textContent = `
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
   }
   
-  .auth-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
-  }
-  
-  /* Responsive */
   @media (max-width: 480px) {
     .auth-notification {
       right: 15px !important;
@@ -361,26 +309,7 @@ authNotificationStyles.textContent = `
       min-width: auto !important;
       max-width: none !important;
     }
-    
-    .auth-notification-content {
-      padding: 15px !important;
-    }
-    
-    .auth-notification-message {
-      font-size: 14px !important;
-    }
   }
 `;
 
 document.head.appendChild(authNotificationStyles);
-
-// Exportar funciones si se usa como módulo
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    verificarAccesoAdmin,
-    cerrarSesionAdmin,
-    configurarLogout,
-    mostrarInfoAdmin,
-    showAuthNotification
-  };
-}

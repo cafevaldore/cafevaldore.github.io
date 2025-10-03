@@ -65,21 +65,23 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
       window.location.href = 'index.html';
     }, 1500);
   } catch (error) {
-    console.error('Error en login:', error);
-    switch (error.code) {
-      case 'auth/user-not-found':
-        showError('Usuario no encontrado');
-        break;
-      case 'auth/wrong-password':
-        showError('Contraseña incorrecta');
-        break;
-      case 'auth/invalid-email':
-        showError('Correo electrónico inválido');
-        break;
-      default:
-        showError('Error al iniciar sesión: ' + error.message);
-    }
+  console.error('Error en login:', error);
+  switch (error.code) {
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential': // ← AGREGAR ESTO
+      showError('Credenciales incorrectas');
+      break;
+    case 'auth/invalid-email':
+      showError('Correo electrónico inválido');
+      break;
+    case 'auth/too-many-requests':
+      showError('Demasiados intentos. Intenta más tarde');
+      break;
+    default:
+      showError('Error al iniciar sesión');
   }
+}
 });
 
 // REGISTRO

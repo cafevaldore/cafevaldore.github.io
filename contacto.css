@@ -981,6 +981,7 @@
   justify-content: center;
   font-size: 1.5rem;
   transition: all 0.3s ease;
+  position: relative; /* ← AGREGAR ESTO */
 }
 
 .chat-toggle:hover {
@@ -988,7 +989,7 @@
   background: linear-gradient(135deg, #3E2723, #4E342E);
 }
 
-.chat-toggle .chat-badge {
+.chat-badge {
   position: absolute;
   top: -5px;
   right: -5px;
@@ -997,11 +998,12 @@
   border-radius: 50%;
   width: 24px;
   height: 24px;
-  font-size: 0.8rem;
-  display: flex;
+  font-size: 0.75rem;
+  display: none; /* ← inicialmente oculto */
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  border: 2px solid white; /* ← para que se vea mejor */
 }
 
 .chat-window {
@@ -1034,6 +1036,7 @@
     transform: translateY(0);
   }
 }
+
 
 .chat-header {
   background: linear-gradient(135deg, #2F1B14, #3E2723);
