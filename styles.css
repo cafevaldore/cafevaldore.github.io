@@ -24,19 +24,21 @@ header {
   z-index: 1000;
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
   backdrop-filter: blur(10px);
+  height: 80px; /* ← reducido de 100px a 80px */
 }
 
 nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 0 2rem; /* ← eliminado padding vertical (antes era 1rem 2rem) */
   max-width: 1200px;
   margin: 0 auto;
+  height: 100%; /* ← ocupa todo el alto del header */
 }
 
 .logo {
-  font-size: 1.5rem;
+  font-size: 1.3rem; /* ← reducido de 1.5rem */
   font-weight: bold;
   color: #DAA520;
   text-decoration: none;
@@ -47,6 +49,12 @@ nav {
   text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
+
+.logo img {
+  height: 50px; 
+  width: auto;
+}
+
 .logo:hover {
   transform: scale(1.05);
   text-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
@@ -55,21 +63,23 @@ nav {
 .nav-links {
   display: flex;
   list-style: none;
-  gap: 2rem;
+  gap: 1.5rem; /* ← reducido de 2rem para ahorrar espacio */
   align-items: center;
+  margin: 0; /* ← asegura que no haya margen extra */
+  padding: 0; /* ← asegura que no haya padding extra */
 }
 
 .nav-links a,
 .nav-links button {
   color: white;
   text-decoration: none;
-  padding: 0.75rem 1.25rem;
+  padding: 0.6rem 1rem; /* ← reducido de 0.75rem 1.25rem */
   border-radius: 30px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.95rem; /* ← ligeramente reducido de 1rem */
   display: flex;
   align-items: center;
   gap: 0.5rem;

@@ -376,12 +376,12 @@ async function enviarMensajeComoAdmin() {
   
   try {
     // Crear mensaje
-    const nuevoMensaje = {
-      contenido: mensajeTexto,
-      remitente: 'admin',
-      fecha: Timestamp.now(),
-      leido: true // Los mensajes del admin se marcan como leídos automáticamente
-    };
+const nuevoMensaje = {
+  contenido: mensajeTexto,
+  remitente: 'admin',
+  fecha: Timestamp.now(),
+  leido: false // ✅ Los mensajes del admin empiezan como NO LEÍDOS
+};
     
     // Agregar mensaje a la conversación
     await addDoc(collection(db, "conversacionesClientes", conversacionActiva.id, "mensajes"), nuevoMensaje);
