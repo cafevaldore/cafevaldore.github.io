@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Accede a tu cuenta de Café Valdore - 
+  Inicia sesión o regístrate para gestionar tus pedidos, favoritos y recibir ofertas exclusivas de nuestros cafés.">
+    <!-- PRECONNECT para Firebase (agregar esto) -->
+  <link rel="preconnect" href="https://www.gstatic.com">
+  <link rel="preconnect" href="https://apis.google.com">
+  <link rel="preconnect" href="https://firestore.googleapis.com">
+  
   <title>Iniciar Sesión - Café Valdore</title>
   <link rel="stylesheet" href="auth.css">
   
@@ -12,7 +19,7 @@
 <body>
   <div class="auth-container">
     <a href="index.html" class="logo">
-  <img src="logo.png" alt="Café Valdore" style="height: 200px;">
+  <img src="logo.webp" alt="Café Valdore" style="height: 120px;">
 </a>
     
     <div id="errorMsg" class="error" style="display: none;"></div>
@@ -59,5 +66,22 @@
 
     <a href="index.html" class="back-link">← Volver a la tienda</a>
   </div>
+
+  <script type="module" src="main.js"></script>
+<script>
+// Cargar Firebase solo cuando el usuario interactúe o después de LCP
+function loadFirebase() {
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = 'firebaseconfig.js';
+    document.body.appendChild(script);
+}
+
+// Cargar después de 4 segundos O cuando el usuario haga hover en botones de auth
+setTimeout(loadFirebase, 4000);
+document.getElementById('authBtn')?.addEventListener('mouseover', loadFirebase, { once: true });
+document.getElementById('carritoBtn')?.addEventListener('mouseover', loadFirebase, { once: true });
+</script>
+
 </body>
 </html>
