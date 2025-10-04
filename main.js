@@ -16,34 +16,47 @@ let currentUserId = null;
 let authListenerActive = false;
 let unsubscribeAuth = null;
 
-// ==================== SERVICE WORKER ====================
-// Registrar Service Worker para cache y performance
+// ==================== SERVICE WORKER MEJORADO ====================
 function initServiceWorker() {
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js')
-        .then(function(registration) {
-          console.log('✅ Service Worker registrado con éxito:', registration.scope);
+    // Registrar inmediatamente, no esperar a 'load'
+    navigator.serviceWorker.register('/sw.js')
+      .then(function(registration) {
+        console.log('✅ Service Worker registrado:', registration.scope);
+        
+        // Forzar actualización
+        registration.update();
+        
+        // Verificar si hay una nueva versión
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          console.log('🔄 Nueva versión del Service Worker encontrada');
           
-          // Verificar actualizaciones cada vez que se carga la página
-          registration.update();
-        })
-        .catch(function(error) {
-          console.log('❌ Error registrando Service Worker:', error);
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('🆕 Nueva versión disponible. Recargando...');
+              window.location.reload();
+            }
+          });
         });
-    });
-    
-    // Escuchar cambios en el Service Worker
+      })
+      .catch(function(error) {
+        console.log('❌ Error registrando Service Worker:', error);
+      });
+
+    // Escuchar cambios
     navigator.serviceWorker.addEventListener('controllerchange', function() {
-      console.log('🔄 Service Worker actualizado, recargando...');
+      console.log('🔄 Controller changed, recargando...');
       window.location.reload();
     });
   }
 }
 
-// Inicializar Service Worker
+// Llamar inmediatamente
 initServiceWorker();
 // ==================== FIN SERVICE WORKER ====================
+
+
 
 // Detectar qué funcionalidades necesita la página actual
 const paginaActual = {
