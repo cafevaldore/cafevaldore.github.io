@@ -16,6 +16,35 @@ let currentUserId = null;
 let authListenerActive = false;
 let unsubscribeAuth = null;
 
+// ==================== SERVICE WORKER ====================
+// Registrar Service Worker para cache y performance
+function initServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js')
+        .then(function(registration) {
+          console.log('✅ Service Worker registrado con éxito:', registration.scope);
+          
+          // Verificar actualizaciones cada vez que se carga la página
+          registration.update();
+        })
+        .catch(function(error) {
+          console.log('❌ Error registrando Service Worker:', error);
+        });
+    });
+    
+    // Escuchar cambios en el Service Worker
+    navigator.serviceWorker.addEventListener('controllerchange', function() {
+      console.log('🔄 Service Worker actualizado, recargando...');
+      window.location.reload();
+    });
+  }
+}
+
+// Inicializar Service Worker
+initServiceWorker();
+// ==================== FIN SERVICE WORKER ====================
+
 // Detectar qué funcionalidades necesita la página actual
 const paginaActual = {
   tieneCarrito: !!document.getElementById('listaCarrito'),
