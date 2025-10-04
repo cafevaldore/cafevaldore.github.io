@@ -1,4 +1,6 @@
-# ☕ CAFEVALDORE SYSTEM
+# ☕ CAFEVALDORE SYSTEM - Sitio Web Oficial
+
+**¡Bienvenido al corazón del café especial del Huila!** 🌄
 
 ![Café Valdore](https://img.shields.io/badge/Café-Valdore-brown)
 ![Version](https://img.shields.io/badge/version-1.0.0-green)
@@ -7,13 +9,16 @@
 ## Descripción
 Sistema de gestión integral para comercio electrónico especializado en venta de café que administra catálogo de productos, controla inventario en tiempo real, procesa pedidos con cálculo automático de totales, gestiona base de datos de clientes, controla acceso de usuarios mediante sistema de autenticación segura, y gestiona formularios de contacto y comunicación con clientes.
 
-## Características
-- ✅ Sistema de autenticación de usuarios
-- 🛒 Carrito de compras
-- 💬 Chat en tiempo real
-- 📞 Formulario de contacto
-- 👨‍💼 Panel de administración
-- 📱 Diseño responsive
+## 🚀 Características Principales
+
+| Funcionalidad | Estado | Descripción |
+|---------------|--------|-------------|
+| 🛒 E-commerce | ✅ **Activo** | Venta de cafés especiales online |
+| 🔐 Autenticación | ✅ **Activo** | Login/registro con Firebase |
+| 💬 Chat en Tiempo Real | ✅ **Activo** | Comunicación directa con admin |
+| 📱 Responsive | ✅ **Activo** | Optimizado para todos los dispositivos |
+| 🎨 Panel Admin | ✅ **Activo** | Gestión completa de pedidos |
+
 
 ## Estructura del Proyecto
 
@@ -62,10 +67,20 @@ Sistema de gestión integral para comercio electrónico especializado en venta d
 - `.gitignore`
 - `README.md`
 
-## Tecnologías Utilizadas
-- **Frontend:** HTML5, CSS3, JavaScript
-- **Backend:** Firebase (autenticación, base de datos)
-- **Hosting:** GitHub Pages
+## 🛠️ Tecnologías Utilizadas
+
+```bash
+# Frontend
+📄 HTML5 + CSS3 + JavaScript ES6+
+🔥 Firebase (Auth, Firestore, Storage)
+🎨 Google Fonts (Inter, Playfair Display)
+
+
+# Herramientas
+⚡ Lighthouse (optimización)
+🔒 CSP (seguridad)
+📊 GitHub Pages (hosting)
+
 
 ## Instalación
 1. Clona el repositorio
