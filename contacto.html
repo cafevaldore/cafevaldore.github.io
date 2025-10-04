@@ -308,5 +308,15 @@
   <script type="module" src="chat.js"></script>
   <script type="module" src="main.js"></script>
   <!-- <script type="module" src="contacto.js"></script> -->
+   
+   <!-- Service Worker Registration -->
+<script>
+// Registro adicional para asegurar funcionamiento
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
+</script>
 </body>
 </html>
