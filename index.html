@@ -3,15 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Café Valdore - Descubre nuestros cafés especiales de origen. 
-  Granos premium tostados y molidos. Envíos a todo el país.">
-    <!-- PRECONNECT para Firebase (agregar esto) -->
-  <link rel="preconnect" href="https://www.gstatic.com">
-  <link rel="preconnect" href="https://apis.google.com">
-  <link rel="preconnect" href="https://firestore.googleapis.com">
-  
+  <meta name="description" content="Café Valdore - Descubre nuestros cafés especiales de origen. Granos premium tostados y molidos. Envíos a todo el país.">
   <title>Café Valdore</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="formulario.css">
+  <link rel="stylesheet" href="carrito.css">
+  <link rel="stylesheet" href="cerrarcarrito.css">
+  <link rel="stylesheet" href="contacto.css">
 </head>
 <body>
   <!-- Header con menú responsive -->
@@ -341,24 +339,8 @@ Un café premium, aromático y sofisticado para quienes disfrutan la excelencia 
     </div>
   </div>
 
-  <!-- <script type="module" src="firebaseconfig.js"></script> -->
+  <script type="module" src="firebaseconfig.js"></script>
   <script type="module" src="main.js"></script>
   <script type="module" src="chat.js"></script>
-
-<script>
-// Cargar Firebase solo cuando el usuario interactúe o después de LCP
-function loadFirebase() {
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = 'firebaseconfig.js';
-    document.body.appendChild(script);
-}
-
-// Cargar después de 4 segundos O cuando el usuario haga hover en botones de auth
-setTimeout(loadFirebase, 4000);
-document.getElementById('authBtn')?.addEventListener('mouseover', loadFirebase, { once: true });
-document.getElementById('carritoBtn')?.addEventListener('mouseover', loadFirebase, { once: true });
-</script>
-
 </body>
 </html>
