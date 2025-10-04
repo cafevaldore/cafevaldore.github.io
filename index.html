@@ -1,15 +1,56 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
+  <!-- CSP FINAL FUNCIONAL -->
+  <meta http-equiv="Content-Security-Policy" 
+        content="default-src 'self';
+                 script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://apis.google.com;
+                 style-src 'self' 'unsafe-inline';
+                 img-src 'self' data: https:;
+                 connect-src 'self' https://www.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://www.googleapis.com https://cafelaesperanza-231a4.firebaseapp.com;
+                 frame-src 'self' https://cafelaesperanza-231a4.firebaseapp.com https://apis.google.com;">
+
+  <!-- Headers que SÍ funcionan en meta tags -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+  
+
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Café Valdore - Descubre nuestros cafés especiales de origen. Granos premium tostados y molidos. Envíos a todo el país.">
   <title>Café Valdore</title>
+ 
+
+    <!-- Preconnect para optimizar carga de recursos externos -->
+  <link rel="preconnect" href="https://www.gstatic.com">
+  <link rel="preconnect" href="https://img.shields.io">
+
+
+  
+  <!-- Preload de recursos críticos -->
+  <link rel="preload" href="styles.css" as="style">
+  <link rel="preload" href="formulario.css" as="style">
+  <link rel="preload" href="carrito.css" as="style">
+  <link rel="preload" href="cerrarcarrito.css" as="style">
+  <link rel="preload" href="contacto.css" as="style">
+  <link rel="preload" href="productos.css" as="style">
+  <!-- <link rel="preload" href="main.js" as="script"> -->
+  <link rel="preload" href="bourbon.webp" as="image" type="image/webp">
+  <link rel="preload" href="caturra.webp" as="image" type="image/webp">
+  
+  <!-- CSS -->
+
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="formulario.css">
   <link rel="stylesheet" href="carrito.css">
   <link rel="stylesheet" href="cerrarcarrito.css">
   <link rel="stylesheet" href="contacto.css">
+  <link rel="stylesheet" href="productos.css">
+
+
 </head>
 <body>
   <!-- Header con menú responsive -->
@@ -339,7 +380,7 @@ Un café premium, aromático y sofisticado para quienes disfrutan la excelencia 
     </div>
   </div>
 
-  <script type="module" src="firebaseconfig.js"></script>
+  <!-- <script type="module" src="firebaseconfig.js"></script> -->
   <script type="module" src="main.js"></script>
   <script type="module" src="chat.js"></script>
 </body>

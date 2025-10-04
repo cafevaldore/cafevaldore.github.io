@@ -6,7 +6,7 @@
     rgba(46, 33, 19, 0.85) 50%, 
     rgba(61, 47, 30, 0.8) 75%, 
     rgba(35, 26, 17, 0.9) 100%), 
-    url('fondo-contacto.jpg') center/cover;
+    url('fondo-contacto.webp') center/cover;
   padding: 5rem 2rem;
   text-align: center;
   color: white;

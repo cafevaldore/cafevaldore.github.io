@@ -1,4 +1,4 @@
-// main.js - Archivo universal para todas las páginas
+// main.js - Archivo universal OPTIMIZADO para todas las páginas
 import { 
   getFirestore, collection, getDocs, query, where, addDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -6,31 +6,29 @@ import {
   getAuth, onAuthStateChanged, signOut 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-
 import { auth, db } from './firebaseconfig.js';
 
-// ===== ESTADO GLOBAL DEL CARRITO =====
+// ===== ESTADO GLOBAL =====
 let carrito = [];
 let total = 0;
 let usuarioAutenticado = false;
 let currentUserId = null;
-const formularioContacto = document.getElementById('formularioContacto');
-const enviarmensajechat = document.getElementById('enviarMensajeChat'); //Para solucionar, debo verificar que esté registrado para dejarlo enviar mensaje
+let authListenerActive = false;
+let unsubscribeAuth = null;
 
-//Verificar si se ha iniciado sesión antes de enviar mensaje en el chat
-    // Agregamos el evento "click"
-    enviarmensajechat.addEventListener("click", function() {
-      // Aquí puedes poner la condición o el mensaje que quieras
-       if (!usuarioAutenticado) {
-    mostrarLoginChat();
-    return;
-  }
-    });
+// Detectar qué funcionalidades necesita la página actual
+const paginaActual = {
+  tieneCarrito: !!document.getElementById('listaCarrito'),
+  tieneFormularioContacto: !!document.getElementById('formularioContacto'),
+  tienePedidos: !!document.getElementById('pedidosContainer'),
+  tieneFAQ: document.querySelectorAll('.faq-item').length > 0,
+  tieneProductos: document.querySelectorAll('.add-to-cart-btn').length > 0
+};
 
+console.log('📄 Página detectada:', paginaActual);
 
 // ===== FUNCIONES DEL CARRITO (disponibles globalmente) =====
 window.agregarAlCarrito = function(producto, precio) {
-  // Verificar si el usuario está autenticado antes de agregar
   if (!usuarioAutenticado) {
     mostrarLoginMessage();
     return;
@@ -44,14 +42,14 @@ window.agregarAlCarrito = function(producto, precio) {
   }
   guardarCarrito();
   actualizarCarrito();
-  mostrarNotificacion(`✅ ${producto} agregado al carrito`);
+  mostrarNotificacion(`${producto} agregado al carrito`);
 };
 
 window.eliminarDelCarrito = function(index) {
   carrito.splice(index, 1);
   guardarCarrito();
   actualizarCarrito();
-  mostrarNotificacion(`🗑️ Producto eliminado del carrito`);
+  mostrarNotificacion('Producto eliminado del carrito');
 };
 
 window.cambiarCantidad = function(index, cambio) {
@@ -66,9 +64,7 @@ window.cambiarCantidad = function(index, cambio) {
 
 function guardarCarrito() {
   if (currentUserId) {
-    // Guardar carrito asociado al usuario actual
     localStorage.setItem(`carrito_${currentUserId}`, JSON.stringify(carrito));
-    console.log('💾 Carrito guardado para usuario:', currentUserId, carrito);
   }
 }
 
@@ -76,31 +72,22 @@ function cargarCarrito() {
   if (currentUserId) {
     const carritoGuardado = localStorage.getItem(`carrito_${currentUserId}`);
     carrito = carritoGuardado ? JSON.parse(carritoGuardado) : [];
-    console.log('📦 Carrito cargado para usuario:', currentUserId, carrito);
   } else {
     carrito = [];
   }
   actualizarCarrito();
 }
 
-// ===== FUNCIONES DE LA INTERFAZ =====
+// ===== FUNCIONES DE INTERFAZ =====
 function mostrarNotificacion(mensaje) {
-  // Eliminar notificación existente si hay una
   const notifExistente = document.querySelector('.notificacion');
-  if (notifExistente) {
-    notifExistente.remove();
-  }
+  if (notifExistente) notifExistente.remove();
   
   const notif = document.createElement('div');
   notif.className = 'notificacion';
-  notif.innerHTML = `
-    <div class="notif-content">
-      <span class="notif-text">${mensaje}</span>
-    </div>
-  `;
+  notif.innerHTML = `<div class="notif-content"><span class="notif-text">${mensaje}</span></div>`;
   document.body.appendChild(notif);
   
-  // Auto-remover después de 4 segundos
   setTimeout(() => {
     if (notif.parentNode) {
       notif.style.animation = 'slideOutBounce 0.4s ease-in';
@@ -111,40 +98,34 @@ function mostrarNotificacion(mensaje) {
 
 function mostrarLoginMessage() {
   const loginMessage = document.getElementById("loginMessage");
-  if (loginMessage) {
-    loginMessage.style.display = "flex";
-    
-    // Auto-ocultar después de 5 segundos si se hace click fuera
-    const hideMessage = (e) => {
-      if (e.target === loginMessage) {
-        loginMessage.style.display = "none";
-        document.removeEventListener('click', hideMessage);
-      }
-    };
-    
-    setTimeout(() => {
-      document.addEventListener('click', hideMessage);
-    }, 100);
-  }
+  if (!loginMessage) return;
+  
+  loginMessage.style.display = "flex";
+  
+  const hideMessage = (e) => {
+    if (e.target === loginMessage) {
+      loginMessage.style.display = "none";
+      document.removeEventListener('click', hideMessage);
+    }
+  };
+  
+  setTimeout(() => document.addEventListener('click', hideMessage), 100);
 }
 
 function mostrarLoginChat() {
   const loginchat = document.getElementById("loginChat");
-  if (loginchat) {
-    loginchat.style.display = "flex";
-    
-    // Auto-ocultar después de 5 segundos si se hace click fuera
-    const hideMessage = (e) => {
-      if (e.target === loginchat) {
-        loginchat.style.display = "none";
-        document.removeEventListener('click', hideMessage);
-      }
-    };
-    
-    setTimeout(() => {
-      document.addEventListener('click', hideMessage);
-    }, 100);
-  }
+  if (!loginchat) return;
+  
+  loginchat.style.display = "flex";
+  
+  const hideMessage = (e) => {
+    if (e.target === loginchat) {
+      loginchat.style.display = "none";
+      document.removeEventListener('click', hideMessage);
+    }
+  };
+  
+  setTimeout(() => document.addEventListener('click', hideMessage), 100);
 }
 
 function mostrarCarritoVacio() {
@@ -158,19 +139,13 @@ function mostrarCarritoVacio() {
       <li class="carrito-vacio">
         <div class="empty-cart-icon">🛒</div>
         <p>Tu carrito está vacío</p>
-        <small>¡Agrega algunos de nuestros deliciosos cafés!</small>
+        <small>Agrega algunos de nuestros deliciosos cafés</small>
       </li>
     `;
   }
-  if (totalCarrito) {
-    totalCarrito.textContent = 'Total: $0';
-  }
-  if (guardarPedidoBtn) {
-    guardarPedidoBtn.style.display = 'none';
-  }
-  if (vaciarCarritoBtn) {
-    vaciarCarritoBtn.style.display = 'none';
-  }
+  if (totalCarrito) totalCarrito.textContent = 'Total: $0';
+  if (guardarPedidoBtn) guardarPedidoBtn.style.display = 'none';
+  if (vaciarCarritoBtn) vaciarCarritoBtn.style.display = 'none';
 }
 
 function actualizarCarrito() {
@@ -190,7 +165,6 @@ function actualizarCarrito() {
     return;
   }
 
-  // Mostrar productos en el carrito
   carrito.forEach((item, index) => {
     const subtotal = item.precio * item.cantidad;
     total += subtotal;
@@ -225,148 +199,22 @@ function actualizarCarrito() {
   if (guardarPedidoBtn) guardarPedidoBtn.style.display = 'block';
   if (vaciarCarritoBtn) vaciarCarritoBtn.style.display = 'block';
   
-  // Actualizar contadores
   if (cartCounts) {
     const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
-    cartCounts.forEach(count => {
-      count.textContent = totalItems;
-    });
+    cartCounts.forEach(count => count.textContent = totalItems);
   }
 }
 
-// ===== FUNCIONES DE LA PÁGINA DE PEDIDOS =====
-async function cargarPedidos(uid) {
-  const pedidosContainer = document.getElementById("pedidosContainer");
-  if (!pedidosContainer) return; // Solo ejecutar en página de pedidos
-  
-  try {
-    console.log("🔥 Cargando pedidos para usuario:", uid);
-    
-    const q = query(collection(db, "pedidos"), where("uid", "==", uid));
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-      mostrarSinPedidos();
-      return;
-    }
-
-    const pedidos = [];
-    querySnapshot.forEach((doc) => {
-      const pedidoData = doc.data();
-      pedidos.push({
-        id: doc.id,
-        ...pedidoData
-      });
-    });
-
-    // Ordenar por fecha (más recientes primero)
-    pedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    
-    mostrarPedidos(pedidos);
-
-  } catch (error) {
-    console.error("❌ Error cargando pedidos:", error);
-    pedidosContainer.innerHTML = `
-      <div class="no-pedidos">
-        <h3>⚠️ Error al cargar pedidos</h3>
-        <p>Hubo un problema al cargar tus pedidos. Por favor, intenta recargar la página.</p>
-        <button onclick="location.reload()" class="btn-primary">
-          🔄 Recargar página
-        </button>
-      </div>
-    `;
-  }
-}
-
-function mostrarSinPedidos() {
-  const pedidosContainer = document.getElementById("pedidosContainer");
-  if (!pedidosContainer) return;
-  
-  pedidosContainer.innerHTML = `
-    <div class="no-pedidos">
-      <div class="no-pedidos-icon">📦</div>
-      <h3>No tienes pedidos aún</h3>
-      <p>¡Aún no has realizado ningún pedido! Ve a nuestra tienda y prueba nuestros deliciosos cafés especiales.</p>
-      <a href="index.html" class="btn-primary">
-        ☕ Ver productos
-      </a>
-    </div>
-  `;
-}
-
-function mostrarPedidos(pedidos) {
-  const pedidosContainer = document.getElementById("pedidosContainer");
-  if (!pedidosContainer) return;
-  
-  const pedidosHTML = pedidos.map(pedido => {
-    const fecha = new Date(pedido.fecha);
-    const fechaFormateada = fecha.toLocaleDateString('es-CO', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-
-    const productosHTML = pedido.pedido.map(producto => `
-      <div class="producto-item">
-        <span class="producto-nombre">☕ ${producto.producto}</span>
-        <span class="producto-cantidad">×${producto.cantidad}</span>
-      </div>
-    `).join('');
-
-    return `
-      <div class="pedido-card">
-        <div class="pedido-header">
-          <div class="pedido-id">
-            📋 Pedido #${pedido.id.substring(0, 8)}
-          </div>
-          <div class="pedido-fecha">
-            📅 ${fechaFormateada}
-          </div>
-        </div>
-        
-        <div class="pedido-total">
-          💰 Total: ${parseInt(pedido.total).toLocaleString()}
-        </div>
-        
-        <div class="productos-list">
-          <h4>📦 Productos:</h4>
-          <div class="productos-items">
-            ${productosHTML}
-          </div>
-        </div>
-        
-        <div class="pedido-status">
-          <span class="status-badge status-${pedido.estado || 'pendiente'}">
-            ${pedido.estado === 'completado' ? '✅ Completado' : 
-              pedido.estado === 'en-proceso' ? '⏳ En proceso' : 
-              '🟡 Pendiente'}
-          </span>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  pedidosContainer.innerHTML = `
-    <div class="pedidos-grid">
-      ${pedidosHTML}
-    </div>
-  `;
-
-  console.log(`✅ Mostrando ${pedidos.length} pedidos`);
-}
-
-// ===== FUNCIONALIDAD DE FORMULARIO DE PEDIDO =====
+// ===== FORMULARIO DE PEDIDO =====
 window.mostrarFormularioPedido = function() {
   if (!usuarioAutenticado) {
-    mostrarNotificacion('❌ Debes iniciar sesión para realizar un pedido');
+    mostrarNotificacion('Debes iniciar sesión para realizar un pedido');
     mostrarLoginMessage();
     return;
   }
 
   if (carrito.length === 0) {
-    mostrarNotificacion("🛒 El carrito está vacío");
+    mostrarNotificacion("El carrito está vacío");
     return;
   }
 
@@ -375,7 +223,7 @@ window.mostrarFormularioPedido = function() {
 
   const resumenProductos = carrito.map(item => `
     <div class="resumen-item">
-      <span>☕ ${item.producto} ×${item.cantidad}</span>
+      <span>${item.producto} ×${item.cantidad}</span>
       <span>${(item.precio * item.cantidad).toLocaleString()}</span>
     </div>
   `).join('');
@@ -384,10 +232,10 @@ window.mostrarFormularioPedido = function() {
   formulario.className = 'form-container';
 
   formulario.innerHTML = `
-    <h2>📋 Confirmar Pedido</h2>
+    <h2>Confirmar Pedido</h2>
     
     <div class="resumen-pedido">
-      <h3>📦 Resumen de tu pedido:</h3>
+      <h3>Resumen de tu pedido:</h3>
       ${resumenProductos}
       <div class="resumen-total">
         <strong>Total: ${total.toLocaleString()}</strong>
@@ -395,7 +243,7 @@ window.mostrarFormularioPedido = function() {
     </div>
 
     <form id="formPedido">
-      <h3>📍 Información de entrega:</h3>
+      <h3>Información de entrega:</h3>
       
       <input type="text" id="nombreCliente" placeholder="Nombre completo *" required>
       <input type="tel" id="telefonoCliente" placeholder="Teléfono *" required>
@@ -404,8 +252,8 @@ window.mostrarFormularioPedido = function() {
       <textarea id="notas" placeholder="Observaciones adicionales (opcional)" rows="3"></textarea>
       
       <div class="form-buttons">
-        <button type="button" id="cancelarPedido">❌ Cancelar</button>
-        <button type="submit">✅ Confirmar Pedido</button>
+        <button type="button" id="cancelarPedido">Cancelar</button>
+        <button type="submit">Confirmar Pedido</button>
       </div>
     </form>
   `;
@@ -413,18 +261,14 @@ window.mostrarFormularioPedido = function() {
   overlay.appendChild(formulario);
   document.body.appendChild(overlay);
 
-  // Manejar cancelación
-  formulario.querySelector('#cancelarPedido').addEventListener('click', () => {
-    overlay.remove();
-  });
+  formulario.querySelector('#cancelarPedido').addEventListener('click', () => overlay.remove());
 
-  // Manejar envío del formulario
   formulario.querySelector('#formPedido').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const submitBtn = e.target.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
-    submitBtn.textContent = '⏳ Procesando...';
+    submitBtn.textContent = 'Procesando...';
     submitBtn.disabled = true;
     
     try {
@@ -433,20 +277,17 @@ window.mostrarFormularioPedido = function() {
       carrito = [];
       guardarCarrito();
       actualizarCarrito();
-      mostrarNotificacion('🎉 ¡Pedido confirmado exitosamente!');
+      mostrarNotificacion('Pedido confirmado exitosamente');
     } catch (error) {
       console.error('Error al guardar pedido:', error);
-      mostrarNotificacion('❌ Error al procesar el pedido. Inténtalo de nuevo.');
+      mostrarNotificacion('Error al procesar el pedido. Inténtalo de nuevo.');
       submitBtn.textContent = originalText;
       submitBtn.disabled = false;
     }
   });
 
-  // Cerrar con click fuera del formulario
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) {
-      overlay.remove();
-    }
+    if (e.target === overlay) overlay.remove();
   });
 };
 
@@ -464,30 +305,28 @@ async function guardarPedidoFirebase() {
     throw new Error('Por favor completa todos los campos obligatorios');
   }
 
-// Debería ser esto:
-const pedidoData = {
-  uid: user.uid,
-  datosCliente: {
-    nombre,
-    telefono,
-    direccion,
-    ciudad,
-    email: user.email, // Mover el email aquí
-    notas: notas // Cambiar de observaciones a notas
-  },
-  pedido: carrito,
-  total: total,
-  fecha: new Date().toISOString(),
-  estado: 'pendiente'
-};
+  const pedidoData = {
+    uid: user.uid,
+    datosCliente: {
+      nombre,
+      telefono,
+      direccion,
+      ciudad,
+      email: user.email,
+      notas: notas
+    },
+    pedido: carrito,
+    total: total,
+    fecha: new Date().toISOString(),
+    estado: 'pendiente'
+  };
 
   await addDoc(collection(db, "pedidos"), pedidoData);
-  console.log("✅ Pedido guardado exitosamente");
+  console.log("Pedido guardado exitosamente");
 }
 
 // ===== CONFIGURACIÓN DE INTERFAZ =====
 function configurarInterfaz() {
-  // Elementos del DOM
   const hamburger = document.getElementById('hamburger');
   const mobileMenu = document.getElementById('mobileMenu');
   const carritoBtn = document.getElementById('carritoBtn');
@@ -499,7 +338,6 @@ function configurarInterfaz() {
   const authMobileBtn = document.getElementById('authMobileBtn');
   const vaciarCarritoBtn = document.getElementById('vaciarCarrito');
   const guardarPedidoBtn = document.getElementById('guardarPedido');
-  const addToCartButtons = document.querySelectorAll(".add-to-cart-btn");
 
   // Menú hamburguesa
   if (hamburger && mobileMenu) {
@@ -516,63 +354,84 @@ function configurarInterfaz() {
     });
   }
 
-  // Carrito
-  function toggleCarrito() {
-    if (carritoSidebar && carritoOverlay) {
-      carritoSidebar.classList.toggle('active');
-      carritoOverlay.classList.toggle('active');
-      document.body.style.overflow = carritoSidebar.classList.contains('active') ? 'hidden' : 'auto';
+  // Carrito (solo si existe en la página)
+  if (paginaActual.tieneCarrito) {
+    function toggleCarrito() {
+      if (carritoSidebar && carritoOverlay) {
+        carritoSidebar.classList.toggle('active');
+        carritoOverlay.classList.toggle('active');
+        document.body.style.overflow = carritoSidebar.classList.contains('active') ? 'hidden' : 'auto';
+      }
+    }
+
+    if (carritoBtn) carritoBtn.addEventListener('click', toggleCarrito);
+    if (carritoMobileBtn) {
+      carritoMobileBtn.addEventListener('click', () => {
+        toggleCarrito();
+        if (hamburger) hamburger.classList.remove('active');
+        if (mobileMenu) mobileMenu.classList.remove('active');
+      });
+    }
+
+    if (cerrarCarrito) {
+      cerrarCarrito.addEventListener('click', () => {
+        if (carritoSidebar) carritoSidebar.classList.remove('active');
+        if (carritoOverlay) carritoOverlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      });
+    }
+
+    if (carritoOverlay) {
+      carritoOverlay.addEventListener('click', () => {
+        if (carritoSidebar) carritoSidebar.classList.remove('active');
+        if (carritoOverlay) carritoOverlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      });
+    }
+
+    if (vaciarCarritoBtn) {
+      vaciarCarritoBtn.addEventListener('click', () => {
+        if (carrito.length === 0) {
+          mostrarNotificacion('El carrito ya está vacío');
+          return;
+        }
+        
+        if (confirm('¿Estás seguro de que deseas vaciar el carrito?')) {
+          carrito = [];
+          guardarCarrito();
+          actualizarCarrito();
+          mostrarNotificacion('Carrito vaciado exitosamente');
+        }
+      });
+    }
+
+    if (guardarPedidoBtn) {
+      guardarPedidoBtn.addEventListener('click', window.mostrarFormularioPedido);
     }
   }
 
-  if (carritoBtn) carritoBtn.addEventListener('click', toggleCarrito);
-  if (carritoMobileBtn) {
-    carritoMobileBtn.addEventListener('click', () => {
-      toggleCarrito();
-      if (hamburger) hamburger.classList.remove('active');
-      if (mobileMenu) mobileMenu.classList.remove('active');
-    });
+  // FAQ (solo si existe)
+  if (paginaActual.tieneFAQ) {
+    configurarFAQ();
   }
 
-  if (cerrarCarrito) {
-    cerrarCarrito.addEventListener('click', () => {
-      if (carritoSidebar) carritoSidebar.classList.remove('active');
-      if (carritoOverlay) carritoOverlay.classList.remove('active');
-      document.body.style.overflow = 'auto';
-    });
+  // Formulario de contacto (solo si existe)
+  if (paginaActual.tieneFormularioContacto) {
+    configurarFormularioContacto();
   }
 
-  if (carritoOverlay) {
-    carritoOverlay.addEventListener('click', () => {
-      if (carritoSidebar) carritoSidebar.classList.remove('active');
-      if (carritoOverlay) carritoOverlay.classList.remove('active');
-      document.body.style.overflow = 'auto';
-    });
-  }
-
-  // Vaciar carrito
-  if (vaciarCarritoBtn) {
-    vaciarCarritoBtn.addEventListener('click', () => {
-      if (carrito.length === 0) {
-        mostrarNotificacion('🛒 El carrito ya está vacío');
-        return;
-      }
+  // Botones de añadir al carrito (solo si existen productos)
+  if (paginaActual.tieneProductos) {
+    const addToCartButtons = document.querySelectorAll(".add-to-cart-btn");
+    addToCartButtons.forEach(button => {
+      const producto = button.dataset.producto;
+      const precio = parseInt(button.dataset.precio);
       
-      if (confirm('¿Estás seguro de que deseas vaciar el carrito?')) {
-        carrito = [];
-        guardarCarrito();
-        actualizarCarrito();
-        mostrarNotificacion('🗑️ Carrito vaciado exitosamente');
-      }
+      button.onclick = () => window.agregarAlCarrito(producto, precio);
     });
   }
 
-  // Guardar pedido
-  if (guardarPedidoBtn) {
-    guardarPedidoBtn.addEventListener('click', window.mostrarFormularioPedido);
-  }
-
-  // Botones de autenticación
+  // Sincronizar botones de auth
   function syncAuthButtons() {
     if (authBtn && authMobileBtn) {
       authMobileBtn.textContent = authBtn.textContent;
@@ -581,20 +440,9 @@ function configurarInterfaz() {
   }
 
   setInterval(syncAuthButtons, 100);
-
-  // Botones añadir al carrito - NO verificar autenticación aquí
-  if (addToCartButtons.length > 0) {
-    addToCartButtons.forEach(button => {
-      const producto = button.dataset.producto;
-      const precio = parseInt(button.dataset.precio);
-      
-      // No deshabilitar botones basado en autenticación
-      button.onclick = () => window.agregarAlCarrito(producto, precio);
-    });
-  }
 }
 
-// ===== AUTENTICACIÓN =====
+// ===== AUTENTICACIÓN LAZY =====
 function configurarAutenticacion() {
   const authBtn = document.getElementById('authBtn');
   const authMobileBtn = document.getElementById('authMobileBtn');
@@ -602,29 +450,41 @@ function configurarAutenticacion() {
   const userName = document.getElementById("userName");
   const loginMessage = document.getElementById("loginMessage");
 
-  onAuthStateChanged(auth, async (user) => {
+  // Solo iniciar listener si la página realmente necesita autenticación
+  const necesitaAuth = paginaActual.tieneCarrito || paginaActual.tienePedidos || paginaActual.tieneProductos;
+
+  if (!necesitaAuth) {
+    console.log('⏭️ Página no requiere autenticación - omitiendo listener');
+    // Solo configurar botones básicos de login
+    if (authBtn) authBtn.onclick = () => window.location.href = "auth.html";
+    if (authMobileBtn) authMobileBtn.onclick = () => window.location.href = "auth.html";
+    return;
+  }
+
+  console.log('🔐 Inicializando autenticación...');
+  authListenerActive = true;
+
+  unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // Usuario autenticado
       usuarioAutenticado = true;
-      currentUserId = user.uid; // Guardar ID del usuario actual
+      currentUserId = user.uid;
       
       if (userName) userName.textContent = user.displayName || user.email.split('@')[0];
       if (userWelcome) userWelcome.style.display = "block";
 
-      const logoutText = "🚪 Cerrar Sesión";
+      const logoutText = "Cerrar Sesión";
       if (authBtn) authBtn.textContent = logoutText;
       if (authMobileBtn) authMobileBtn.textContent = logoutText;
 
       const logoutFunction = async () => {
         try {
           await signOut(auth);
-          // Limpiar carrito al cerrar sesión
           carrito = [];
           currentUserId = null;
-          mostrarNotificacion("👋 Sesión cerrada correctamente");
+          mostrarNotificacion("Sesión cerrada correctamente");
         } catch (error) {
           console.error(error);
-          mostrarNotificacion("❌ Error al cerrar sesión");
+          mostrarNotificacion("Error al cerrar sesión");
         }
       };
 
@@ -633,91 +493,75 @@ function configurarAutenticacion() {
 
       if (loginMessage) loginMessage.style.display = "none";
       
-      // Cargar carrito del usuario actual
-      cargarCarrito();
+      // Solo cargar carrito si la página lo necesita
+      if (paginaActual.tieneCarrito) {
+        cargarCarrito();
+      }
       
-      // Cargar pedidos si estamos en la página de pedidos
-      await cargarPedidos(user.uid);
+      // Solo cargar pedidos si estamos en esa página
+      if (paginaActual.tienePedidos) {
+        const cargarPedidosModule = await import('./cargarPedidos.js');
+        await cargarPedidosModule.cargarPedidos(user.uid);
+      }
     } else {
-      // Usuario no autenticado
       usuarioAutenticado = false;
       currentUserId = null;
-      carrito = []; // Limpiar carrito
+      carrito = [];
       
       if (userWelcome) userWelcome.style.display = "none";
 
-      const loginText = "🔑 Iniciar Sesión";
+      const loginText = "Iniciar Sesión";
       if (authBtn) authBtn.textContent = loginText;
       if (authMobileBtn) authMobileBtn.textContent = loginText;
 
-      const loginFunction = () => {
-        window.location.href = "auth.html";
-      };
+      const loginFunction = () => window.location.href = "auth.html";
 
       if (authBtn) authBtn.onclick = loginFunction;
       if (authMobileBtn) authMobileBtn.onclick = loginFunction;
 
-      // Mostrar carrito vacío
-      actualizarCarrito();
+      if (paginaActual.tieneCarrito) {
+        actualizarCarrito();
+      }
     }
   });
 }
 
-// ===== INICIALIZACIÓN =====
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('🔄 Inicializando aplicación...');
-  configurarInterfaz();
-  configurarAutenticacion();
-  console.log('🛒 Carrito inicial:', carrito);
-});
-
-
-
-
-
-
-// Funcionalidad para la página de contacto
-document.addEventListener('DOMContentLoaded', function() {
-  // Funcionalidad para las preguntas frecuentes
+// ===== FAQ =====
+function configurarFAQ() {
   const faqItems = document.querySelectorAll('.faq-item');
   
   faqItems.forEach(item => {
     const pregunta = item.querySelector('.faq-pregunta');
     
-    pregunta.addEventListener('click', () => {
-      // Cerrar otros items abiertos
-      faqItems.forEach(otherItem => {
-        if (otherItem !== item && otherItem.classList.contains('active')) {
-          otherItem.classList.remove('active');
-        }
+    if (pregunta) {
+      pregunta.addEventListener('click', () => {
+        faqItems.forEach(otherItem => {
+          if (otherItem !== item && otherItem.classList.contains('active')) {
+            otherItem.classList.remove('active');
+          }
+        });
+        item.classList.toggle('active');
       });
-      
-      // Alternar el item actual
-      item.classList.toggle('active');
-    });
+    }
   });
-  });
+}
+
+// ===== FORMULARIO CONTACTO =====
+function configurarFormularioContacto() {
+  const formularioContacto = document.getElementById('formularioContacto');
   
+  if (!formularioContacto) return;
 
-
-
-//Para contactos
-
-// Modificar la función de envío
-if (formularioContacto) {
   formularioContacto.addEventListener('submit', async function(e) {
     e.preventDefault();
-    
-    // Validación (igual que antes)
     
     const btnEnviar = formularioContacto.querySelector('.btn-enviar');
     const textoOriginal = btnEnviar.textContent;
     
-    btnEnviar.textContent = '⏳ Enviando...';
+    btnEnviar.textContent = 'Enviando...';
     btnEnviar.disabled = true;
     
     try {
-      // Guardar en Firebase
       await addDoc(collection(db, "mensajesContacto"), {
         nombre: document.getElementById('nombreContacto').value.trim(),
         email: document.getElementById('emailContacto').value.trim(),
@@ -728,14 +572,57 @@ if (formularioContacto) {
         leido: false
       });
       
-      mostrarNotificacion('✅ Mensaje enviado correctamente. Te contactaremos pronto!', 'success');
+      mostrarNotificacion('Mensaje enviado correctamente. Te contactaremos pronto');
       formularioContacto.reset();
     } catch (error) {
       console.error('Error al guardar mensaje:', error);
-      mostrarNotificacion('❌ Error al enviar el mensaje. Intenta nuevamente.', 'error');
+      mostrarNotificacion('Error al enviar el mensaje. Intenta nuevamente.');
     } finally {
       btnEnviar.textContent = textoOriginal;
       btnEnviar.disabled = false;
     }
   });
+}
+
+// ===== CHAT VERIFICACIÓN =====
+function configurarChatVerificacion() {
+  const enviarmensajechat = document.getElementById('enviarMensajeChat');
+  
+  if (enviarmensajechat) {
+    enviarmensajechat.addEventListener("click", function() {
+      if (!usuarioAutenticado) {
+        mostrarLoginChat();
+        return;
+      }
+    });
+  }
+}
+
+// ===== INICIALIZACIÓN =====
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('Inicializando aplicación optimizada...');
+  console.log('Funcionalidades detectadas:', paginaActual);
+  
+  configurarInterfaz();
+  configurarAutenticacion();
+  configurarChatVerificacion();
+  
+  console.log('Carrito inicial:', carrito);
+});
+
+// ===== LIMPIEZA =====
+window.addEventListener('beforeunload', () => {
+  if (unsubscribeAuth) {
+    unsubscribeAuth();
+  }
+});
+
+// Exportar función de limpieza para SPAs
+export function limpiarMain() {
+  if (unsubscribeAuth) {
+    unsubscribeAuth();
+    unsubscribeAuth = null;
+  }
+  authListenerActive = false;
+  console.log('Main limpiado correctamente');
 }
