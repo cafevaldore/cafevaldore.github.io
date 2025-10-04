@@ -18,6 +18,9 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 let conversacionId = null;
 let usuarioActual = null;
 let mensajesNoLeidos = 0;
+let chatInicializado = false;
+let unsubscribeMensajes = null;
+let unsubscribeAuth = null;
 
 // Generar ID seguro con Web Crypto API
 function generarIdSeguro() {
@@ -26,29 +29,37 @@ function generarIdSeguro() {
   return 'guest_' + Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
-// Inicializar el chat
+// Inicializar solo los event listeners básicos
 document.addEventListener('DOMContentLoaded', function() {
   const chatBadge = document.getElementById('chatBadge');
   if (chatBadge) {
     chatBadge.style.display = 'none';
   }
   
-  inicializarChat();
+  // Inicializar autenticación inmediatamente para el contador
+  inicializarAuthParaContador();
+  
+  // Configurar el botón de toggle
+  const chatToggle = document.getElementById('chatToggle');
+  if (chatToggle) {
+    chatToggle.addEventListener('click', inicializarChatLazy);
+  }
 });
 
-async function inicializarChat() {
+// Inicializar solo la autenticación y contador, no toda la UI del chat
+async function inicializarAuthParaContador() {
   const auth = getAuth();
   
-  onAuthStateChanged(auth, (user) => {
+  unsubscribeAuth = onAuthStateChanged(auth, (user) => {
     if (user) {
-      // Usuario autenticado - usar datos de Firebase
+      // Usuario autenticado
       usuarioActual = {
         uid: user.uid,
         email: user.email
       };
-      cargarConversacionUsuario();
+      cargarConversacionUsuario(); // Solo para el contador
     } else {
-      // Usuario invitado - generar ID seguro
+      // Usuario invitado
       let guestId = localStorage.getItem('guestChatId');
       if (!guestId) {
         guestId = generarIdSeguro();
@@ -59,18 +70,40 @@ async function inicializarChat() {
         uid: guestId,
         email: 'invitado@valdore.com'
       };
-      cargarConversacionUsuario();
+      cargarConversacionUsuario(); // Solo para el contador
     }
   });
+}
 
-  // Configurar event listeners
+// Inicialización lazy - solo cuando el usuario hace clic
+async function inicializarChatLazy() {
+  // Si ya está inicializado, solo toggle
+  if (chatInicializado) {
+    toggleChat();
+    return;
+  }
+
+  console.log('Inicializando UI del chat por primera vez...');
+  chatInicializado = true;
+
+  // Remover este listener y agregar el normal
   const chatToggle = document.getElementById('chatToggle');
-  const chatClose = document.getElementById('chatClose');
-  const enviarMensajeBtn = document.getElementById('enviarMensajeChat');
-  
   if (chatToggle) {
+    chatToggle.removeEventListener('click', inicializarChatLazy);
     chatToggle.addEventListener('click', toggleChat);
   }
+
+  // Ahora sí inicializar la UI completa del chat
+  await inicializarUICompleta();
+  
+  // Abrir el chat inmediatamente después de inicializar
+  abrirChat();
+}
+
+async function inicializarUICompleta() {
+  // Configurar event listeners de UI
+  const chatClose = document.getElementById('chatClose');
+  const enviarMensajeBtn = document.getElementById('enviarMensajeChat');
   
   if (chatClose) {
     chatClose.addEventListener('click', cerrarChat);
@@ -88,6 +121,13 @@ async function inicializarChat() {
         enviarMensaje();
       }
     });
+  }
+  
+  // Si ya tenemos una conversación, cargar los mensajes
+  if (conversacionId) {
+    suscribirMensajes(conversacionId);
+  } else {
+    mostrarMensajeBienvenida();
   }
 }
 
@@ -132,26 +172,42 @@ async function cargarConversacionUsuario() {
     if (!querySnapshot.empty) {
       const conversacionDoc = querySnapshot.docs[0];
       conversacionId = conversacionDoc.id;
+      
+      // Suscribirse a mensajes inmediatamente para el contador
       suscribirMensajes(conversacionId);
     } else {
-      mostrarMensajeBienvenida();
+      // Si no hay conversación, mostrar bienvenida solo si la UI está inicializada
+      if (chatInicializado) {
+        mostrarMensajeBienvenida();
+      }
       actualizarContadorMensajes(0);
     }
     
   } catch (error) {
     console.error("Error cargando conversación:", error);
-    mostrarMensajeBienvenida();
+    if (chatInicializado) {
+      mostrarMensajeBienvenida();
+    }
     actualizarContadorMensajes(0);
   }
 }
 
 function suscribirMensajes(conversacionId) {
+  // Si ya existe una suscripción, cancelarla primero
+  if (unsubscribeMensajes) {
+    unsubscribeMensajes();
+  }
+
   const mensajesRef = collection(db, "conversacionesClientes", conversacionId, "mensajes");
   const q = query(mensajesRef, orderBy("fecha", "asc"));
   
-  onSnapshot(q, (snapshot) => {
-    const chatMessages = document.getElementById('chatMessages');
-    chatMessages.innerHTML = '';
+  // Guardar la función de desuscripción
+  unsubscribeMensajes = onSnapshot(q, (snapshot) => {
+    // Solo manipular el DOM si el chat está inicializado
+    if (chatInicializado) {
+      const chatMessages = document.getElementById('chatMessages');
+      chatMessages.innerHTML = '';
+    }
     
     let contadorNoLeidos = 0;
     const chatWindow = document.getElementById('chatWindow');
@@ -159,8 +215,13 @@ function suscribirMensajes(conversacionId) {
     
     snapshot.forEach((doc) => {
       const mensaje = doc.data();
-      agregarMensajeAlChat(mensaje);
       
+      // Solo agregar al DOM si el chat está inicializado
+      if (chatInicializado) {
+        agregarMensajeAlChat(mensaje);
+      }
+      
+      // Siempre contar mensajes no leídos, independientemente del estado del chat
       if (mensaje.remitente === 'admin' && mensaje.leido === false && !chatAbierto) {
         contadorNoLeidos++;
       }
@@ -169,7 +230,13 @@ function suscribirMensajes(conversacionId) {
     mensajesNoLeidos = contadorNoLeidos;
     actualizarContadorMensajes(mensajesNoLeidos);
     
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    // Solo hacer scroll si el chat está inicializado y abierto
+    if (chatInicializado) {
+      const chatMessages = document.getElementById('chatMessages');
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  }, (error) => {
+    console.error("Error en suscripción de mensajes:", error);
   });
 }
 
@@ -310,7 +377,10 @@ function actualizarContadorMensajes(cantidad) {
   }
 }
 
+// Listener para cerrar chat al hacer clic fuera
 document.addEventListener('click', (e) => {
+  if (!chatInicializado) return;
+  
   const chatWindow = document.getElementById('chatWindow');
   const chatToggle = document.getElementById('chatToggle');
   
@@ -321,3 +391,30 @@ document.addEventListener('click', (e) => {
     cerrarChat();
   }
 });
+
+// Limpiar suscripciones cuando la página se descarga
+window.addEventListener('beforeunload', () => {
+  if (unsubscribeMensajes) {
+    unsubscribeMensajes();
+  }
+  if (unsubscribeAuth) {
+    unsubscribeAuth();
+  }
+});
+
+// Función para limpiar recursos manualmente (útil para SPAs)
+export function limpiarChat() {
+  if (unsubscribeMensajes) {
+    unsubscribeMensajes();
+    unsubscribeMensajes = null;
+  }
+  if (unsubscribeAuth) {
+    unsubscribeAuth();
+    unsubscribeAuth = null;
+  }
+  chatInicializado = false;
+  conversacionId = null;
+  usuarioActual = null;
+  mensajesNoLeidos = 0;
+  console.log('Chat limpiado correctamente');
+}
