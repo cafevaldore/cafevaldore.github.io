@@ -56,7 +56,61 @@ function initServiceWorker() {
 initServiceWorker();
 // ==================== FIN SERVICE WORKER ====================
 
+// manejo global de errores
+window.addEventListener('error', (event) => {
+  // Ignorar errores de message port (extensiones)
+  if (event.error && event.error.message && 
+      event.error.message.includes('message port closed')) {
+    event.preventDefault();
+    return false;
+  }
+});
 
+// O específicamente para estos errores
+const originalConsoleError = console.error;
+console.error = (...args) => {
+  if (args[0] && typeof args[0] === 'string' && 
+      args[0].includes('message port closed')) {
+    return; // Silenciar este error específico
+  }
+  originalConsoleError.apply(console, args);
+};
+// ==================== FIN MANEJO DE ERRORES ====================
+// En tu main.js - detección de plataforma
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+console.log('📱 Dispositivo móvil detectado:', isMobile);
+
+// Silenciar errores específicos de mobile
+if (isMobile) {
+  const originalError = console.error;
+  console.error = function(...args) {
+    if (args[0] && typeof args[0] === 'string' && 
+        (args[0].includes('message port closed') || 
+         args[0].includes('Content Script Bridge'))) {
+      return; // Silenciar en mobile
+    }
+    originalError.apply(console, args);
+  };
+}
+// ==================== FIN MANEJO MOVILES ====================
+// En tu main.js - detección de entorno de desarrollo/emulador
+const isLikelyEmulator = navigator.platform === 'Win32' && 
+                        navigator.userAgent.includes('Android');
+
+if (isLikelyEmulator) {
+  console.log('🔧 Entorno de emulación detectado - silenciando errores de bridge');
+  
+  // Silenciar errores específicos de emulador
+  const originalError = console.error;
+  console.error = function(...args) {
+    if (args[0] && typeof args[0] === 'string' && 
+        args[0].includes('message port closed')) {
+      return; // Silenciar en emulador
+    }
+    originalError.apply(console, args);
+  };
+}
+// ==================== FIN DETECCIÓN DE ENTORNO ====================
 
 // Detectar qué funcionalidades necesita la página actual
 const paginaActual = {
