@@ -1,17 +1,38 @@
-import { db } from './firebaseconfig.js';
-import { 
-  collection, 
-  getDocs, 
-  addDoc, 
-  doc, 
-  query, 
-  orderBy, 
-  where,
-  Timestamp,
-  onSnapshot,
-  updateDoc,
-  limit
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+// admin-chat.js - OPTIMIZADO (Firebase ya cargado por admin.js)
+
+// Variables para módulos de Firebase (reutilizar del scope global)
+let firebaseModules = {
+  db: null,
+  loaded: false
+};
+
+// Función para obtener Firebase (ya debería estar cargado por admin.js)
+async function getFirebaseModules() {
+  if (firebaseModules.loaded) {
+    return firebaseModules;
+  }
+
+  // Cargar si no está disponible
+  console.log('📦 Admin-chat: Cargando Firebase...');
+  
+  const configModule = await import('./firebaseconfig.js');
+  firebaseModules.db = configModule.db;
+  
+  const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+  firebaseModules.collection = firestoreModule.collection;
+  firebaseModules.getDocs = firestoreModule.getDocs;
+  firebaseModules.addDoc = firestoreModule.addDoc;
+  firebaseModules.doc = firestoreModule.doc;
+  firebaseModules.query = firestoreModule.query;
+  firebaseModules.orderBy = firestoreModule.orderBy;
+  firebaseModules.where = firestoreModule.where;
+  firebaseModules.Timestamp = firestoreModule.Timestamp;
+  firebaseModules.onSnapshot = firestoreModule.onSnapshot;
+  firebaseModules.updateDoc = firestoreModule.updateDoc;
+  
+  firebaseModules.loaded = true;
+  return firebaseModules;
+}
 
 // Variables globales para el chat
 let conversacionesData = [];
@@ -32,18 +53,18 @@ const mensajeAdmin = document.getElementById('mensajeAdmin');
 const enviarMensajeAdmin = document.getElementById('enviarMensajeAdmin');
 const chatInputContainer = document.getElementById('chatInputContainer');
 
-// Inicializar el sistema de chat cuando se carga la página
 document.addEventListener('DOMContentLoaded', function() {
-  // Esperar a que se cargue el admin.js y se configuren los tabs
   setTimeout(() => {
     inicializarChatAdmin();
   }, 100);
 });
 
-function inicializarChatAdmin() {
+async function inicializarChatAdmin() {
   console.log('Inicializando chat admin...');
   
-  // Configurar event listeners
+  // Asegurar que Firebase esté cargado
+  await getFirebaseModules();
+  
   if (buscarConversacion) {
     buscarConversacion.addEventListener('input', filtrarConversaciones);
   }
@@ -69,7 +90,6 @@ function inicializarChatAdmin() {
     });
   }
   
-  // Escuchar cuando se cambie al tab de chat
   const tabButtons = document.querySelectorAll('.tab-btn');
   tabButtons.forEach(button => {
     if (button.dataset.tab === 'chat') {
@@ -81,31 +101,28 @@ function inicializarChatAdmin() {
     }
   });
   
-  // Cargar conversaciones inicialmente si el tab de chat está activo
   const tabChat = document.getElementById('tab-chat');
   if (tabChat && tabChat.classList.contains('active')) {
     cargarConversaciones();
   }
 }
 
-// Cargar todas las conversaciones de clientes
 async function cargarConversaciones() {
   try {
-    // Cancelar suscripción anterior si existe
+    await getFirebaseModules();
+    
     if (unsubscribeConversaciones) {
       unsubscribeConversaciones();
     }
     
     mostrarCargandoConversaciones();
     
-    // Consultar conversaciones ordenadas por fecha del último mensaje
-    const q = query(
-      collection(db, "conversacionesClientes"), 
-      orderBy("fechaUltimoMensaje", "desc")
+    const q = firebaseModules.query(
+      firebaseModules.collection(firebaseModules.db, "conversacionesClientes"), 
+      firebaseModules.orderBy("fechaUltimoMensaje", "desc")
     );
     
-    // Escuchar cambios en tiempo real
-    unsubscribeConversaciones = onSnapshot(q, (snapshot) => {
+    unsubscribeConversaciones = firebaseModules.onSnapshot(q, (snapshot) => {
       conversacionesData = [];
       
       snapshot.forEach((documento) => {
@@ -117,13 +134,11 @@ async function cargarConversaciones() {
           fechaCreacion: data.fechaCreacion,
           fechaUltimoMensaje: data.fechaUltimoMensaje,
           estado: data.estado || 'activa',
-          mensajesSinLeer: 0 // Se calculará después
+          mensajesSinLeer: 0
         });
       });
       
-      // Calcular mensajes sin leer para cada conversación
       calcularMensajesSinLeer();
-      
       mostrarConversaciones();
     }, (error) => {
       console.error("Error cargando conversaciones:", error);
@@ -136,18 +151,17 @@ async function cargarConversaciones() {
   }
 }
 
-// Calcular mensajes sin leer para cada conversación
 async function calcularMensajesSinLeer() {
   for (let conversacion of conversacionesData) {
     try {
-      const mensajesRef = collection(db, "conversacionesClientes", conversacion.id, "mensajes");
-      const q = query(
+      const mensajesRef = firebaseModules.collection(firebaseModules.db, "conversacionesClientes", conversacion.id, "mensajes");
+      const q = firebaseModules.query(
         mensajesRef, 
-        where("remitente", "==", "cliente"),
-        where("leido", "==", false)
+        firebaseModules.where("remitente", "==", "cliente"),
+        firebaseModules.where("leido", "==", false)
       );
       
-      const snapshot = await getDocs(q);
+      const snapshot = await firebaseModules.getDocs(q);
       conversacion.mensajesSinLeer = snapshot.size;
     } catch (error) {
       console.error("Error contando mensajes sin leer:", error);
@@ -156,7 +170,6 @@ async function calcularMensajesSinLeer() {
   }
 }
 
-// Mostrar conversaciones en la lista
 function mostrarConversaciones() {
   if (!conversacionesLista) return;
   
@@ -198,7 +211,6 @@ function mostrarConversaciones() {
   }).join('');
 }
 
-// Filtrar conversaciones
 function filtrarConversaciones() {
   mostrarConversaciones();
 }
@@ -206,7 +218,6 @@ function filtrarConversaciones() {
 function filtrarConversacionesData() {
   let conversacionesFiltradas = [...conversacionesData];
   
-  // Filtrar por búsqueda
   const busqueda = buscarConversacion?.value.toLowerCase();
   if (busqueda) {
     conversacionesFiltradas = conversacionesFiltradas.filter(c => 
@@ -215,7 +226,6 @@ function filtrarConversacionesData() {
     );
   }
   
-  // Filtrar por estado
   const filtro = filtroConversacionesEstado?.value;
   if (filtro === 'sin-responder') {
     conversacionesFiltradas = conversacionesFiltradas.filter(c => c.mensajesSinLeer > 0);
@@ -226,44 +236,36 @@ function filtrarConversacionesData() {
   return conversacionesFiltradas;
 }
 
-// Seleccionar una conversación
-window.seleccionarConversacion = function(conversacionId) {
+window.seleccionarConversacion = async function(conversacionId) {
+  await getFirebaseModules();
+  
   const conversacion = conversacionesData.find(c => c.id === conversacionId);
   if (!conversacion) return;
   
   conversacionActiva = conversacion;
   
-  // Actualizar header del chat
   if (clienteNombre) clienteNombre.textContent = conversacion.usuarioEmail;
   if (clienteEmail) clienteEmail.textContent = `ID: ${conversacion.usuarioId}`;
   if (chatStatus) {
     chatStatus.innerHTML = `<span class="status-indicator online"></span> En línea`;
   }
   
-  // Mostrar área de input
   if (chatInputContainer) chatInputContainer.style.display = 'block';
   
-  // Cargar mensajes de la conversación
   cargarMensajesConversacion(conversacionId);
-  
-  // Actualizar la lista para resaltar la conversación activa
   mostrarConversaciones();
-  
-  // Marcar mensajes como leídos
   marcarMensajesComoLeidos(conversacionId);
 };
 
-// Cargar mensajes de una conversación específica
 function cargarMensajesConversacion(conversacionId) {
-  // Cancelar suscripción anterior si existe
   if (unsubscribeMensajes) {
     unsubscribeMensajes();
   }
   
-  const mensajesRef = collection(db, "conversacionesClientes", conversacionId, "mensajes");
-  const q = query(mensajesRef, orderBy("fecha", "asc"));
+  const mensajesRef = firebaseModules.collection(firebaseModules.db, "conversacionesClientes", conversacionId, "mensajes");
+  const q = firebaseModules.query(mensajesRef, firebaseModules.orderBy("fecha", "asc"));
   
-  unsubscribeMensajes = onSnapshot(q, (snapshot) => {
+  unsubscribeMensajes = firebaseModules.onSnapshot(q, (snapshot) => {
     if (!chatMessages) return;
     
     chatMessages.innerHTML = '';
@@ -283,54 +285,13 @@ function cargarMensajesConversacion(conversacionId) {
       agregarMensajeAlChat(mensaje);
     });
     
-    // Scroll al final
     chatMessages.scrollTop = chatMessages.scrollHeight;
   });
 }
 
-// Agregar mensaje al chat
-// function agregarMensajeAlChat(mensaje) {
-//   if (!chatMessages) return;
-  
-//   // Limpiar mensaje de bienvenida si existe
-//   const welcomeMsg = chatMessages.querySelector('.chat-welcome');
-//   if (welcomeMsg) {
-//     welcomeMsg.remove();
-//   }
-  
-//   const mensajeElement = document.createElement('div');
-//   mensajeElement.className = `mensaje-chat-admin ${mensaje.remitente === 'admin' ? 'mensaje-admin' : 'mensaje-cliente'}`;
-  
-//   const fecha = mensaje.fecha?.toDate ? mensaje.fecha.toDate() : new Date();
-//   const fechaFormateada = fecha.toLocaleTimeString('es-CO', { 
-//     hour: '2-digit', 
-//     minute: '2-digit' 
-//   });
-  
-//   const esAdmin = mensaje.remitente === 'admin';
-  
-//   mensajeElement.innerHTML = `
-//     <div class="mensaje-contenido-admin">
-//       <div class="mensaje-avatar">
-//         ${esAdmin ? '👨‍💼' : '👤'}
-//       </div>
-//       <div class="mensaje-texto">
-//         <div class="mensaje-header-admin">
-//           <span class="remitente">${esAdmin ? 'Tú (Admin)' : 'Cliente'}</span>
-//           <span class="mensaje-hora">${fechaFormateada}</span>
-//         </div>
-//         <p>${mensaje.contenido}</p>
-//       </div>
-//     </div>
-//   `;
-  
-//   chatMessages.appendChild(mensajeElement);
-// }
-// Agregar mensaje al chat
 function agregarMensajeAlChat(mensaje) {
   if (!chatMessages) return;
   
-  // Limpiar mensaje de bienvenida si existe
   const welcomeMsg = chatMessages.querySelector('.chat-welcome');
   if (welcomeMsg) {
     welcomeMsg.remove();
@@ -339,7 +300,6 @@ function agregarMensajeAlChat(mensaje) {
   const mensajeElement = document.createElement('div');
   const esAdmin = mensaje.remitente === 'admin';
   
-  // Añadir clase mensaje-largo si el contenido es extenso
   const esMensajeLargo = mensaje.contenido.length > 200;
   mensajeElement.className = `mensaje-chat-admin ${esAdmin ? 'mensaje-admin' : 'mensaje-cliente'} ${esMensajeLargo ? 'mensaje-largo' : ''}`;
   
@@ -367,7 +327,6 @@ function agregarMensajeAlChat(mensaje) {
   chatMessages.appendChild(mensajeElement);
 }
 
-// Enviar mensaje como administrador
 async function enviarMensajeComoAdmin() {
   if (!conversacionActiva || !mensajeAdmin) return;
   
@@ -375,26 +334,26 @@ async function enviarMensajeComoAdmin() {
   if (!mensajeTexto) return;
   
   try {
-    // Crear mensaje
-const nuevoMensaje = {
-  contenido: mensajeTexto,
-  remitente: 'admin',
-  fecha: Timestamp.now(),
-  leido: false // ✅ Los mensajes del admin empiezan como NO LEÍDOS
-};
+    await getFirebaseModules();
     
-    // Agregar mensaje a la conversación
-    await addDoc(collection(db, "conversacionesClientes", conversacionActiva.id, "mensajes"), nuevoMensaje);
+    const nuevoMensaje = {
+      contenido: mensajeTexto,
+      remitente: 'admin',
+      fecha: firebaseModules.Timestamp.now(),
+      leido: false
+    };
     
-    // Actualizar fecha del último mensaje
-    await updateDoc(doc(db, "conversacionesClientes", conversacionActiva.id), {
-      fechaUltimoMensaje: Timestamp.now()
-    });
+    await firebaseModules.addDoc(
+      firebaseModules.collection(firebaseModules.db, "conversacionesClientes", conversacionActiva.id, "mensajes"), 
+      nuevoMensaje
+    );
     
-    // Limpiar input
+    await firebaseModules.updateDoc(
+      firebaseModules.doc(firebaseModules.db, "conversacionesClientes", conversacionActiva.id), 
+      { fechaUltimoMensaje: firebaseModules.Timestamp.now() }
+    );
+    
     mensajeAdmin.value = '';
-    
-    // Redimensionar textarea
     mensajeAdmin.style.height = 'auto';
     
   } catch (error) {
@@ -403,30 +362,31 @@ const nuevoMensaje = {
   }
 }
 
-// Marcar mensajes del cliente como leídos
 async function marcarMensajesComoLeidos(conversacionId) {
   try {
-    const mensajesRef = collection(db, "conversacionesClientes", conversacionId, "mensajes");
-    const q = query(
+    await getFirebaseModules();
+    
+    const mensajesRef = firebaseModules.collection(firebaseModules.db, "conversacionesClientes", conversacionId, "mensajes");
+    const q = firebaseModules.query(
       mensajesRef, 
-      where("remitente", "==", "cliente"),
-      where("leido", "==", false)
+      firebaseModules.where("remitente", "==", "cliente"),
+      firebaseModules.where("leido", "==", false)
     );
     
-    const snapshot = await getDocs(q);
+    const snapshot = await firebaseModules.getDocs(q);
     
     const actualizaciones = [];
     snapshot.forEach((documento) => {
       actualizaciones.push(
-        updateDoc(doc(db, "conversacionesClientes", conversacionId, "mensajes", documento.id), {
-          leido: true
-        })
+        firebaseModules.updateDoc(
+          firebaseModules.doc(firebaseModules.db, "conversacionesClientes", conversacionId, "mensajes", documento.id), 
+          { leido: true }
+        )
       );
     });
     
     await Promise.all(actualizaciones);
     
-    // Actualizar contador local
     const conversacion = conversacionesData.find(c => c.id === conversacionId);
     if (conversacion) {
       conversacion.mensajesSinLeer = 0;
@@ -437,7 +397,6 @@ async function marcarMensajesComoLeidos(conversacionId) {
   }
 }
 
-// Utilidades
 function formatearFechaRelativa(fecha) {
   if (!fecha) return 'Hace tiempo';
   
@@ -452,35 +411,24 @@ function formatearFechaRelativa(fecha) {
     const ahora = new Date();
     const diferencia = ahora - fechaObj;
     
-    // Menos de 1 minuto
-    if (diferencia < 60000) {
-      return 'Ahora';
-    }
-    
-    // Menos de 1 hora
+    if (diferencia < 60000) return 'Ahora';
     if (diferencia < 3600000) {
       const minutos = Math.floor(diferencia / 60000);
       return `Hace ${minutos}m`;
     }
-    
-    // Menos de 24 horas
     if (diferencia < 86400000) {
       const horas = Math.floor(diferencia / 3600000);
       return `Hace ${horas}h`;
     }
     
-    // Más de 24 horas
     const dias = Math.floor(diferencia / 86400000);
-    if (dias === 1) {
-      return 'Ayer';
-    } else if (dias < 7) {
-      return `Hace ${dias} días`;
-    } else {
-      return fechaObj.toLocaleDateString('es-CO', { 
-        day: 'numeric', 
-        month: 'short' 
-      });
-    }
+    if (dias === 1) return 'Ayer';
+    if (dias < 7) return `Hace ${dias} días`;
+    
+    return fechaObj.toLocaleDateString('es-CO', { 
+      day: 'numeric', 
+      month: 'short' 
+    });
     
   } catch (error) {
     return 'Fecha inválida';
@@ -509,7 +457,6 @@ function mostrarErrorConversaciones() {
 }
 
 function mostrarNotificacionChat(mensaje, tipo = 'info') {
-  // Usar el mismo sistema de notificaciones del admin.js
   if (window.mostrarNotificacion) {
     window.mostrarNotificacion(mensaje, tipo);
   } else {
@@ -517,7 +464,6 @@ function mostrarNotificacionChat(mensaje, tipo = 'info') {
   }
 }
 
-// Limpiar suscripciones cuando se cambie de página
 window.addEventListener('beforeunload', () => {
   if (unsubscribeConversaciones) {
     unsubscribeConversaciones();
@@ -527,7 +473,6 @@ window.addEventListener('beforeunload', () => {
   }
 });
 
-// Auto-resize del textarea
 document.addEventListener('DOMContentLoaded', function() {
   const textarea = document.getElementById('mensajeAdmin');
   if (textarea) {
@@ -537,3 +482,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+console.log('✅ admin-chat.js cargado - Modo optimizado');

@@ -2,13 +2,23 @@
 <html lang="es">
 <head>
   <!-- CSP FINAL FUNCIONAL -->
-  <meta http-equiv="Content-Security-Policy" 
-        content="default-src 'self';
-                 script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://apis.google.com;
-                 style-src 'self' 'unsafe-inline';
-                 img-src 'self' data: https:;
-                 connect-src 'self' https://www.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://www.googleapis.com https://cafelaesperanza-231a4.firebaseapp.com;
-                 frame-src 'self' https://cafelaesperanza-231a4.firebaseapp.com https://apis.google.com;">
+<meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self';
+               script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://apis.google.com;
+               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+               font-src 'self' https://fonts.gstatic.com;
+               img-src 'self' data: https:;
+               connect-src 'self' 
+                 https://www.gstatic.com 
+                 https://firestore.googleapis.com 
+                 https://identitytoolkit.googleapis.com 
+                 https://www.googleapis.com 
+                 https://cafelaesperanza-231a4.firebaseapp.com
+                 https://securetoken.googleapis.com;
+               frame-src 'self' 
+                 https://cafelaesperanza-231a4.firebaseapp.com 
+                 https://apis.google.com;">
+                 
 
   <!-- Headers que SÍ funcionan en meta tags -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -21,6 +31,10 @@
   <meta name="description" content="Realiza tu pedido de café especial - 
   Bourbon, Caturra y variedades premium. Café Valdore con envío rápido y seguro. Compra online fácil y confiable.">
   <title>Mis Pedidos - Café Valdore</title>
+
+  <!-- Preload de CSS para mejorar rendimiento -->
+  <link rel="preload" href="styles.css" as="style">
+
    <link rel="stylesheet" href="carrito.css">
   <link rel="stylesheet" href="contacto.css">
   <link rel="stylesheet" href="pedidos.css">
@@ -138,7 +152,6 @@
       <p>&copy; 2025 Café Valdore. Todos los derechos reservados.</p>
     </div>
   </footer>
-  <script type="module" src="main.js"></script>
     <!-- Chat flotante para comunicación con administrador -->
   <div class="chat-container" id="chatContainer">
     <button class="chat-toggle" id="chatToggle">
@@ -176,15 +189,18 @@
         </button>
       </div>
     </div>
-  <script type="module"src="chat.js"></script>
-  <script type="module"src="main.js"></script>
-  <script type="module"src="cargarPedidos.js"></script>
-  <!-- Service Worker Registration -->
+
+<!-- ✅ DEJAR SOLO ESTO -->
+<script type="module" src="main.js"></script>
+<script type="module" src="chat.js"></script>
+
+<!-- Service Worker Registration -->
 <script>
-// Registro adicional para asegurar funcionamiento
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js');
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('✅ SW registrado'))
+      .catch(err => console.log('❌ SW error:', err));
   });
 }
 </script>

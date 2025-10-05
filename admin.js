@@ -1,29 +1,55 @@
-import { db } from './firebaseconfig.js';
-import { 
-  collection, 
-  getDocs, 
-  updateDoc, 
-  doc, 
-  query, 
-  orderBy, 
-  where,
-  Timestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+// admin.js - OPTIMIZADO con carga diferida
+
+// Variables para módulos de Firebase
+let firebaseModules = {
+  db: null,
+  loaded: false
+};
+
+// Cargar Firebase solo cuando se necesite
+async function loadFirebaseForAdmin() {
+  if (firebaseModules.loaded) {
+    return firebaseModules;
+  }
+
+  console.log('📦 Admin: Cargando Firebase...');
+
+  try {
+    const configModule = await import('./firebaseconfig.js');
+    firebaseModules.db = configModule.db;
+    
+    const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    firebaseModules.collection = firestoreModule.collection;
+    firebaseModules.getDocs = firestoreModule.getDocs;
+    firebaseModules.updateDoc = firestoreModule.updateDoc;
+    firebaseModules.doc = firestoreModule.doc;
+    firebaseModules.query = firestoreModule.query;
+    firebaseModules.orderBy = firestoreModule.orderBy;
+    firebaseModules.where = firestoreModule.where;
+    firebaseModules.Timestamp = firestoreModule.Timestamp;
+    
+    firebaseModules.loaded = true;
+    console.log('✅ Admin: Firebase cargado');
+    
+    return firebaseModules;
+  } catch (error) {
+    console.error('❌ Admin: Error cargando Firebase:', error);
+    throw error;
+  }
+}
 
 // Variables globales
 let pedidosData = [];
 let mensajesData = [];
 let currentTab = 'pedidos';
 
-// Elementos del DOM - ACTUALIZADOS PARA LA NUEVA ESTRUCTURA
+// Elementos del DOM
 const tabButtons = document.querySelectorAll('.tab-btn');
 const tabPanes = document.querySelectorAll('.tab-pane');
 const listaPedidos = document.getElementById('listaPedidosAdmin');
 const listaMensajes = document.getElementById('listaMensajesAdmin');
 const filtroEstado = document.getElementById('filtroEstado');
 const filtroFecha = document.getElementById('filtroFecha');
-
-// BOTÓN ÚNICO DE ACTUALIZAR (movido a tabs)
 const btnActualizar = document.getElementById('btnActualizar');
 
 // Elementos de modal
@@ -38,14 +64,16 @@ const totalMensajesEl = document.getElementById('totalMensajes');
 const totalClientesEl = document.getElementById('totalClientes');
 
 // Inicialización
-document.addEventListener('DOMContentLoaded', function() {
-  initializeAdmin();
+document.addEventListener('DOMContentLoaded', async function() {
+  await initializeAdmin();
 });
 
 async function initializeAdmin() {
   try {
-    // Mostrar loading
     showLoading();
+    
+    // Cargar Firebase primero
+    await loadFirebaseForAdmin();
     
     // Cargar datos iniciales
     await Promise.all([
@@ -53,13 +81,8 @@ async function initializeAdmin() {
       cargarMensajes()
     ]);
     
-    // Configurar event listeners
     setupEventListeners();
-    
-    // Actualizar estadísticas
     actualizarEstadisticas();
-    
-    // Mostrar tab activo
     mostrarTabPedidos();
     
   } catch (error) {
@@ -69,7 +92,6 @@ async function initializeAdmin() {
 }
 
 function setupEventListeners() {
-  // Tabs
   tabButtons.forEach(button => {
     button.addEventListener('click', (e) => {
       if (button.hasAttribute('data-tab')) {
@@ -79,47 +101,36 @@ function setupEventListeners() {
     });
   });
 
-  // Filtros
   if (filtroEstado) filtroEstado.addEventListener('change', filtrarPedidos);
   if (filtroFecha) filtroFecha.addEventListener('change', filtrarPedidos);
   
-  // BOTÓN ÚNICO DE ACTUALIZAR - actualiza todo según el tab activo
   if (btnActualizar) {
     btnActualizar.addEventListener('click', async () => {
       try {
-        // Cambiar texto del botón mientras carga
         const originalText = btnActualizar.innerHTML;
         btnActualizar.innerHTML = '⏳ Actualizando...';
         btnActualizar.disabled = true;
         
-        // Cargar datos
         await Promise.all([
           cargarPedidos(),
           cargarMensajes()
         ]);
         
-        // Actualizar estadísticas
         actualizarEstadisticas();
-        
-        // Mostrar notificación de éxito
         mostrarNotificacion('Datos actualizados correctamente', 'success');
         
-        // Restaurar botón
         btnActualizar.innerHTML = originalText;
         btnActualizar.disabled = false;
         
       } catch (error) {
         console.error('Error actualizando datos:', error);
         mostrarError('Error al actualizar los datos');
-        
-        // Restaurar botón
         btnActualizar.innerHTML = '🔄 Actualizar';
         btnActualizar.disabled = false;
       }
     });
   }
 
-  // Modal
   if (closeModal) closeModal.addEventListener('click', cerrarModal);
   window.addEventListener('click', (e) => {
     if (e.target === modal) cerrarModal();
@@ -129,32 +140,30 @@ function setupEventListeners() {
 function switchTab(tabName) {
   currentTab = tabName;
   
-  // Actualizar botones
   tabButtons.forEach(btn => btn.classList.remove('active'));
   const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
   if (activeButton) activeButton.classList.add('active');
   
-  // Actualizar contenido
   tabPanes.forEach(pane => pane.classList.remove('active'));
   const activePane = document.getElementById(`tab-${tabName}`);
   if (activePane) activePane.classList.add('active');
   
-  // Cargar contenido específico si es necesario
   if (tabName === 'pedidos') {
     mostrarTabPedidos();
   } else if (tabName === 'mensajes') {
     mostrarTabMensajes();
   } else if (tabName === 'chat') {
-    // El chat se maneja en admin-chat.js
     console.log('Tab de chat activado');
   }
 }
 
-// GESTIÓN DE PEDIDOS
 async function cargarPedidos() {
   try {
-    const q = query(collection(db, "pedidos"), orderBy("fecha", "desc"));
-    const querySnapshot = await getDocs(q);
+    const q = firebaseModules.query(
+      firebaseModules.collection(firebaseModules.db, "pedidos"), 
+      firebaseModules.orderBy("fecha", "desc")
+    );
+    const querySnapshot = await firebaseModules.getDocs(q);
     
     pedidosData = [];
     querySnapshot.forEach((documento) => {
@@ -228,10 +237,10 @@ function mostrarTabPedidos() {
         
         <div class="productos-admin-list">
           <h4>☕ Productos</h4>
-          ${(pedido.productos || []).map(producto => `
+          ${(pedido.pedido || []).map(producto => `
             <div class="producto-admin-item">
-              <span>${producto.nombre} (${producto.peso || '500g'})</span>
-              <span>Cantidad: ${producto.cantidad} - ${formatearPrecio(producto.precio * producto.cantidad)}</span>
+              <span>${producto.producto}</span>
+              <span>Cantidad: ${producto.cantidad} - $${formatearPrecio(producto.precio * producto.cantidad)}</span>
             </div>
           `).join('')}
         </div>
@@ -247,7 +256,6 @@ function filtrarPedidos() {
 function filtrarPedidosData() {
   let pedidosFiltrados = [...pedidosData];
   
-  // Filtrar por estado
   const estadoFiltro = filtroEstado?.value;
   if (estadoFiltro && estadoFiltro !== 'todos') {
     pedidosFiltrados = pedidosFiltrados.filter(pedido => 
@@ -255,7 +263,6 @@ function filtrarPedidosData() {
     );
   }
   
-  // Filtrar por fecha
   const fechaFiltro = filtroFecha?.value;
   if (fechaFiltro) {
     const fechaSeleccionada = new Date(fechaFiltro);
@@ -276,15 +283,16 @@ function filtrarPedidosData() {
   return pedidosFiltrados;
 }
 
-// Función global para cambiar estado de pedido
 window.cambiarEstado = async function(pedidoId, nuevoEstado) {
   try {
-    await updateDoc(doc(db, "pedidos", pedidoId), {
-      estado: nuevoEstado,
-      fechaActualizacion: Timestamp.now()
-    });
+    await firebaseModules.updateDoc(
+      firebaseModules.doc(firebaseModules.db, "pedidos", pedidoId), 
+      {
+        estado: nuevoEstado,
+        fechaActualizacion: firebaseModules.Timestamp.now()
+      }
+    );
     
-    // Actualizar en memoria
     const pedidoIndex = pedidosData.findIndex(p => p.id === pedidoId);
     if (pedidoIndex !== -1) {
       pedidosData[pedidoIndex].estado = nuevoEstado;
@@ -300,7 +308,6 @@ window.cambiarEstado = async function(pedidoId, nuevoEstado) {
   }
 };
 
-// Función global para abrir modal de pedido
 window.abrirModalPedido = function(pedidoId) {
   const pedido = pedidosData.find(p => p.id === pedidoId);
   if (!pedido) return;
@@ -312,7 +319,7 @@ window.abrirModalPedido = function(pedidoId) {
         <div class="info-grid">
           <p><strong>Estado:</strong> <span class="estado-badge estado-${pedido.estado || 'pendiente'}">${formatearEstado(pedido.estado || 'pendiente')}</span></p>
           <p><strong>Fecha:</strong> ${formatearFecha(pedido.fecha)}</p>
-          <p><strong>Total:</strong> ${formatearPrecio(pedido.total || 0)}</p>
+          <p><strong>Total:</strong> $${formatearPrecio(pedido.total || 0)}</p>
         </div>
       </div>
       
@@ -335,12 +342,11 @@ window.abrirModalPedido = function(pedidoId) {
             <div class="producto-modal-item">
               <div class="producto-info">
                 <h5>${producto.producto}</h5>
-                <p>Peso: 500g</p>
-                <p>Precio unitario: ${formatearPrecio(producto.precio)}</p>
+                <p>Precio unitario: $${formatearPrecio(producto.precio)}</p>
               </div>
               <div class="producto-cantidad">
                 <span class="cantidad">x${producto.cantidad}</span>
-                <span class="subtotal">${formatearPrecio(producto.precio * producto.cantidad)}</span>
+                <span class="subtotal">$${formatearPrecio(producto.precio * producto.cantidad)}</span>
               </div>
             </div>
           `).join('')}
@@ -367,7 +373,6 @@ window.abrirModalPedido = function(pedidoId) {
   modal.style.display = 'block';
 };
 
-// Función global para cambiar estado y cerrar modal
 window.cambiarEstadoYCerrar = async function(pedidoId, nuevoEstado) {
   await cambiarEstado(pedidoId, nuevoEstado);
   cerrarModal();
@@ -377,11 +382,13 @@ function cerrarModal() {
   if (modal) modal.style.display = 'none';
 }
 
-// GESTIÓN DE MENSAJES (solo mensajes de contacto)
 async function cargarMensajes() {
   try {
-    const q = query(collection(db, "mensajesContacto"), orderBy("fecha", "desc"));
-    const querySnapshot = await getDocs(q);
+    const q = firebaseModules.query(
+      firebaseModules.collection(firebaseModules.db, "mensajesContacto"), 
+      firebaseModules.orderBy("fecha", "desc")
+    );
+    const querySnapshot = await firebaseModules.getDocs(q);
     
     mensajesData = [];
     querySnapshot.forEach((documento) => {
@@ -445,15 +452,16 @@ function mostrarTabMensajes() {
   `).join('');
 }
 
-// Función global para marcar como leído
 window.marcarLeido = async function(mensajeId) {
   try {
-    await updateDoc(doc(db, "mensajesContacto", mensajeId), {
-      leido: true,
-      fechaLeido: Timestamp.now()
-    });
+    await firebaseModules.updateDoc(
+      firebaseModules.doc(firebaseModules.db, "mensajesContacto", mensajeId), 
+      {
+        leido: true,
+        fechaLeido: firebaseModules.Timestamp.now()
+      }
+    );
     
-    // Actualizar en memoria
     const mensajeIndex = mensajesData.findIndex(m => m.id === mensajeId);
     if (mensajeIndex !== -1) {
       mensajesData[mensajeIndex].leido = true;
@@ -469,14 +477,13 @@ window.marcarLeido = async function(mensajeId) {
   }
 };
 
-// Función global para marcar como no leído
 window.marcarNoLeido = async function(mensajeId) {
   try {
-    await updateDoc(doc(db, "mensajesContacto", mensajeId), {
-      leido: false
-    });
+    await firebaseModules.updateDoc(
+      firebaseModules.doc(firebaseModules.db, "mensajesContacto", mensajeId), 
+      { leido: false }
+    );
     
-    // Actualizar en memoria
     const mensajeIndex = mensajesData.findIndex(m => m.id === mensajeId);
     if (mensajeIndex !== -1) {
       mensajesData[mensajeIndex].leido = false;
@@ -492,14 +499,11 @@ window.marcarNoLeido = async function(mensajeId) {
   }
 };
 
-// ESTADÍSTICAS
 function actualizarEstadisticas() {
-  // Total de pedidos
   if (totalPedidosEl) {
     totalPedidosEl.textContent = pedidosData.length;
   }
   
-  // Pedidos pendientes
   if (pedidosPendientesEl) {
     const pendientes = pedidosData.filter(p => 
       !p.estado || p.estado === 'pendiente'
@@ -507,34 +511,25 @@ function actualizarEstadisticas() {
     pedidosPendientesEl.textContent = pendientes;
   }
   
-  // Total mensajes
   if (totalMensajesEl) {
     totalMensajesEl.textContent = mensajesData.length;
   }
   
-  // Total clientes únicos - usando UID
   if (totalClientesEl) {
     const uidsUnicos = new Set();
     
-    // Agregar UIDs de pedidos
     pedidosData.forEach(pedido => {
-      if (pedido.uid) {
-        uidsUnicos.add(pedido.uid);
-      }
+      if (pedido.uid) uidsUnicos.add(pedido.uid);
     });
     
-    // Agregar emails únicos de mensajes (ya que no tienen UID)
     mensajesData.forEach(mensaje => {
-      if (mensaje.email) {
-        uidsUnicos.add(mensaje.email);
-      }
+      if (mensaje.email) uidsUnicos.add(mensaje.email);
     });
     
     totalClientesEl.textContent = uidsUnicos.size;
   }
 }
 
-// UTILIDADES
 function formatearFecha(fecha) {
   if (!fecha) return 'Fecha no disponible';
   
@@ -585,7 +580,6 @@ function mostrarError(mensaje) {
 }
 
 function mostrarNotificacion(mensaje, tipo = 'info') {
-  // Crear elemento de notificación
   const notificacion = document.createElement('div');
   notificacion.className = `notificacion ${tipo}`;
   notificacion.innerHTML = `
@@ -595,7 +589,6 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
     </div>
   `;
   
-  // Estilos inline para la notificación
   notificacion.style.cssText = `
     position: fixed;
     top: 20px;
@@ -613,17 +606,14 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
       'background: linear-gradient(135deg, #3B82F6, #2563EB);'}
   `;
   
-  // Agregar al DOM
   document.body.appendChild(notificacion);
   
-  // Configurar cierre automático
   const autoClose = setTimeout(() => {
     if (notificacion.parentNode) {
       notificacion.remove();
     }
   }, 5000);
   
-  // Configurar cierre manual
   const closeBtn = notificacion.querySelector('.notificacion-close');
   closeBtn.addEventListener('click', () => {
     clearTimeout(autoClose);
@@ -631,7 +621,6 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
   });
 }
 
-// CSS adicional para animaciones de notificación
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
   @keyframes slideInRight {
@@ -647,3 +636,5 @@ styleSheet.textContent = `
 `;
 
 document.head.appendChild(styleSheet);
+
+console.log('✅ admin.js cargado - Modo optimizado');

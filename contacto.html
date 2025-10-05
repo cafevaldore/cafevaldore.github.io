@@ -4,15 +4,23 @@
 
 
   <!-- CSP CORREGIDO PARA GOOGLE MAPS -->
-  <meta http-equiv="Content-Security-Policy" 
-        content="default-src 'self';
-                 script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://maps.googleapis.com;
-                 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-                 font-src 'self' https://fonts.gstatic.com;
-                 img-src 'self' data: https:;
-                 connect-src 'self' https://www.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://www.googleapis.com https://cafelaesperanza-231a4.firebaseapp.com https://maps.googleapis.com;
-                 frame-src 'self' https://cafelaesperanza-231a4.firebaseapp.com https://apis.google.com https://www.google.com https://*.google.com;">
-
+<meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self';
+               script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://apis.google.com;
+               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+               font-src 'self' https://fonts.gstatic.com;
+               img-src 'self' data: https:;
+               connect-src 'self' 
+                 https://www.gstatic.com 
+                 https://firestore.googleapis.com 
+                 https://identitytoolkit.googleapis.com 
+                 https://www.googleapis.com 
+                 https://cafelaesperanza-231a4.firebaseapp.com
+                 https://securetoken.googleapis.com;
+               frame-src 'self' 
+                 https://cafelaesperanza-231a4.firebaseapp.com 
+                 https://apis.google.com;">
+                 
   <!-- Headers de seguridad -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -22,6 +30,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Contacta a Café Valdore - WhatsApp, correo electrónico y redes sociales. Atención personalizada, asesoramiento en cafés especiales y soporte al cliente.">
   <title>Contacto - Café Valdore</title>
+
+<!-- Preload de CSS para mejorar rendimiento -->
+  <link rel="preload" href="styles.css" as="style">
+
+
    <link rel="stylesheet" href="contacto.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="carrito.css">
@@ -305,16 +318,16 @@
       </div>
     </div>
   <!-- Scripts -->
-  <script type="module" src="chat.js"></script>
-  <script type="module" src="main.js"></script>
-  <!-- <script type="module" src="contacto.js"></script> -->
-   
-   <!-- Service Worker Registration -->
+<!-- ✅ MANTENER -->
+<script type="module" src="main.js"></script>
+<script type="module" src="chat.js"></script>
+
 <script>
-// Registro adicional para asegurar funcionamiento
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js');
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('✅ SW registrado'))
+      .catch(err => console.log('❌ SW error:', err));
   });
 }
 </script>

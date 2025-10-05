@@ -3,14 +3,22 @@
 <head>
 
   <!-- CSP FINAL FUNCIONAL -->
-  <meta http-equiv="Content-Security-Policy" 
-        content="default-src 'self';
-                 script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://apis.google.com;
-                 style-src 'self' 'unsafe-inline';
-                 img-src 'self' data: https:;
-                 connect-src 'self' https://www.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://www.googleapis.com https://cafelaesperanza-231a4.firebaseapp.com;
-                 frame-src 'self' https://cafelaesperanza-231a4.firebaseapp.com https://apis.google.com;">
-
+<meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self';
+               script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://apis.google.com;
+               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+               font-src 'self' https://fonts.gstatic.com;
+               img-src 'self' data: https:;
+               connect-src 'self' 
+                 https://www.gstatic.com 
+                 https://firestore.googleapis.com 
+                 https://identitytoolkit.googleapis.com 
+                 https://www.googleapis.com 
+                 https://cafelaesperanza-231a4.firebaseapp.com
+                 https://securetoken.googleapis.com;
+               frame-src 'self' 
+                 https://cafelaesperanza-231a4.firebaseapp.com 
+                 https://apis.google.com;">
   <!-- Headers que SÍ funcionan en meta tags -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -63,7 +71,8 @@
     </div>
   </div>
 
-  <script type="module" src="firebaseconfig.js"></script>
+  <!-- Scripts -->
 <script type="module" src="admin-login.js"></script>
+
 </body>
 </html>

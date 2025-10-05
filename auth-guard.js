@@ -1,10 +1,41 @@
-// auth-guard.js - Protección segura con Firebase Authentication
-import { auth } from './firebaseconfig.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+// auth-guard.js - OPTIMIZADO con carga diferida
+
+// Variables para módulos de Firebase
+let firebaseModules = {
+  auth: null,
+  loaded: false
+};
 
 const ADMIN_EMAILS = [
   'jarolmedina41@gmail.com'
 ];
+
+// Cargar Firebase solo cuando se necesite
+async function loadFirebaseForGuard() {
+  if (firebaseModules.loaded) {
+    return firebaseModules;
+  }
+
+  console.log('📦 Auth-guard: Cargando Firebase...');
+
+  try {
+    // Cargar configuración
+    const configModule = await import('./firebaseconfig.js');
+    firebaseModules.auth = configModule.auth;
+    
+    // Cargar módulos de Auth
+    const authModule = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    firebaseModules.onAuthStateChanged = authModule.onAuthStateChanged;
+    
+    firebaseModules.loaded = true;
+    console.log('✅ Auth-guard: Firebase cargado');
+    
+    return firebaseModules;
+  } catch (error) {
+    console.error('❌ Auth-guard: Error cargando Firebase:', error);
+    throw error;
+  }
+}
 
 // Limpiar localStorage obsoleto (solo una vez)
 if (localStorage.getItem('isAdmin')) {
@@ -15,9 +46,11 @@ if (localStorage.getItem('isAdmin')) {
 }
 
 // Verificar autenticación de administrador
-function verificarAccesoAdmin() {
+async function verificarAccesoAdmin() {
+  await loadFirebaseForGuard();
+  
   return new Promise((resolve) => {
-    onAuthStateChanged(auth, (user) => {
+    firebaseModules.onAuthStateChanged(firebaseModules.auth, (user) => {
       if (!user) {
         showAuthNotification('Debes iniciar sesión', 'warning');
         setTimeout(() => {
@@ -29,7 +62,7 @@ function verificarAccesoAdmin() {
 
       if (!ADMIN_EMAILS.includes(user.email.toLowerCase())) {
         showAuthNotification('No tienes permisos de administrador', 'error');
-        auth.signOut();
+        firebaseModules.auth.signOut();
         setTimeout(() => {
           window.location.href = 'admin-login.html';
         }, 2000);
@@ -43,10 +76,14 @@ function verificarAccesoAdmin() {
 }
 
 // Cerrar sesión
-function cerrarSesionAdmin() {
+async function cerrarSesionAdmin() {
+  if (!firebaseModules.loaded) {
+    await loadFirebaseForGuard();
+  }
+  
   showAuthNotification('Cerrando sesión...', 'info');
   
-  auth.signOut().then(() => {
+  firebaseModules.auth.signOut().then(() => {
     showAuthNotification('Sesión cerrada exitosamente', 'success');
     setTimeout(() => {
       window.location.href = 'admin-login.html';
@@ -73,8 +110,12 @@ function configurarLogout() {
 }
 
 // Mostrar información del admin
-function mostrarInfoAdmin() {
-  onAuthStateChanged(auth, (user) => {
+async function mostrarInfoAdmin() {
+  if (!firebaseModules.loaded) {
+    await loadFirebaseForGuard();
+  }
+  
+  firebaseModules.onAuthStateChanged(firebaseModules.auth, (user) => {
     if (user && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
       const adminInfoElements = document.querySelectorAll('.admin-info, .user-welcome');
       
@@ -196,13 +237,14 @@ document.addEventListener('DOMContentLoaded', async function() {
                       !window.location.pathname.includes('admin-login');
   
   if (isAdminPage) {
+    // Solo cargar Firebase si estamos en una página de admin que NO sea login
     const tieneAcceso = await verificarAccesoAdmin();
     
     if (tieneAcceso) {
       configurarLogout();
       mostrarInfoAdmin();
       
-      onAuthStateChanged(auth, (user) => {
+      firebaseModules.onAuthStateChanged(firebaseModules.auth, (user) => {
         if (user) {
           showAuthNotification(`Bienvenido, ${user.email}`, 'success');
         }
@@ -313,3 +355,5 @@ authNotificationStyles.textContent = `
 `;
 
 document.head.appendChild(authNotificationStyles);
+
+console.log('✅ auth-guard.js cargado - Modo optimizado');

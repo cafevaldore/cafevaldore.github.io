@@ -1,12 +1,4 @@
-// main.js - Archivo universal OPTIMIZADO para todas las páginas
-import { 
-  getFirestore, collection, getDocs, query, where, addDoc, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { 
-  getAuth, onAuthStateChanged, signOut 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-import { auth, db } from './firebaseconfig.js';
+// main.js - OPTIMIZADO con carga diferida de Firebase
 
 // ===== ESTADO GLOBAL =====
 let carrito = [];
@@ -16,18 +8,43 @@ let currentUserId = null;
 let authListenerActive = false;
 let unsubscribeAuth = null;
 
-// ==================== SERVICE WORKER MEJORADO ====================
+// ===== MÓDULOS DE FIREBASE (carga diferida) =====
+let firebaseModules = {
+  auth: null,
+  db: null,
+  loaded: false
+};
+
+// ===== FUNCIÓN PARA CARGAR FIREBASE SOLO CUANDO SE NECESITE =====
+async function loadFirebase() {
+  if (firebaseModules.loaded) {
+    return firebaseModules;
+  }
+
+  console.log('📦 Cargando Firebase bajo demanda...');
+
+  try {
+    const configModule = await import('./firebaseconfig.js');
+    firebaseModules.auth = configModule.auth;
+    firebaseModules.db = configModule.db;
+    firebaseModules.loaded = true;
+
+    console.log('✅ Firebase cargado exitosamente');
+    return firebaseModules;
+  } catch (error) {
+    console.error('❌ Error cargando Firebase:', error);
+    throw error;
+  }
+}
+
+// ==================== SERVICE WORKER ====================
 function initServiceWorker() {
   if ('serviceWorker' in navigator) {
-    // Registrar inmediatamente, no esperar a 'load'
     navigator.serviceWorker.register('/sw.js')
       .then(function(registration) {
         console.log('✅ Service Worker registrado:', registration.scope);
-        
-        // Forzar actualización
         registration.update();
         
-        // Verificar si hay una nueva versión
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
           console.log('🔄 Nueva versión del Service Worker encontrada');
@@ -44,7 +61,6 @@ function initServiceWorker() {
         console.log('❌ Error registrando Service Worker:', error);
       });
 
-    // Escuchar cambios
     navigator.serviceWorker.addEventListener('controllerchange', function() {
       console.log('🔄 Controller changed, recargando...');
       window.location.reload();
@@ -52,13 +68,10 @@ function initServiceWorker() {
   }
 }
 
-// Llamar inmediatamente
 initServiceWorker();
-// ==================== FIN SERVICE WORKER ====================
 
-// manejo global de errores
+// ==================== MANEJO DE ERRORES ====================
 window.addEventListener('error', (event) => {
-  // Ignorar errores de message port (extensiones)
   if (event.error && event.error.message && 
       event.error.message.includes('message port closed')) {
     event.preventDefault();
@@ -66,53 +79,17 @@ window.addEventListener('error', (event) => {
   }
 });
 
-// O específicamente para estos errores
 const originalConsoleError = console.error;
 console.error = (...args) => {
   if (args[0] && typeof args[0] === 'string' && 
-      args[0].includes('message port closed')) {
-    return; // Silenciar este error específico
+      (args[0].includes('message port closed') || 
+       args[0].includes('Content Script Bridge'))) {
+    return;
   }
   originalConsoleError.apply(console, args);
 };
-// ==================== FIN MANEJO DE ERRORES ====================
-// En tu main.js - detección de plataforma
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-console.log('📱 Dispositivo móvil detectado:', isMobile);
 
-// Silenciar errores específicos de mobile
-if (isMobile) {
-  const originalError = console.error;
-  console.error = function(...args) {
-    if (args[0] && typeof args[0] === 'string' && 
-        (args[0].includes('message port closed') || 
-         args[0].includes('Content Script Bridge'))) {
-      return; // Silenciar en mobile
-    }
-    originalError.apply(console, args);
-  };
-}
-// ==================== FIN MANEJO MOVILES ====================
-// En tu main.js - detección de entorno de desarrollo/emulador
-const isLikelyEmulator = navigator.platform === 'Win32' && 
-                        navigator.userAgent.includes('Android');
-
-if (isLikelyEmulator) {
-  console.log('🔧 Entorno de emulación detectado - silenciando errores de bridge');
-  
-  // Silenciar errores específicos de emulador
-  const originalError = console.error;
-  console.error = function(...args) {
-    if (args[0] && typeof args[0] === 'string' && 
-        args[0].includes('message port closed')) {
-      return; // Silenciar en emulador
-    }
-    originalError.apply(console, args);
-  };
-}
-// ==================== FIN DETECCIÓN DE ENTORNO ====================
-
-// Detectar qué funcionalidades necesita la página actual
+// ==================== DETECCIÓN DE PÁGINA ====================
 const paginaActual = {
   tieneCarrito: !!document.getElementById('listaCarrito'),
   tieneFormularioContacto: !!document.getElementById('formularioContacto'),
@@ -123,8 +100,8 @@ const paginaActual = {
 
 console.log('📄 Página detectada:', paginaActual);
 
-// ===== FUNCIONES DEL CARRITO (disponibles globalmente) =====
-window.agregarAlCarrito = function(producto, precio) {
+// ===== FUNCIONES DEL CARRITO =====
+window.agregarAlCarrito = async function(producto, precio) {
   if (!usuarioAutenticado) {
     mostrarLoginMessage();
     return;
@@ -388,7 +365,13 @@ window.mostrarFormularioPedido = function() {
 };
 
 async function guardarPedidoFirebase() {
-  const user = auth.currentUser;
+  if (!firebaseModules.loaded) {
+    await loadFirebase();
+  }
+
+  const { addDoc, collection } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+  
+  const user = firebaseModules.auth.currentUser;
   if (!user) throw new Error('Usuario no autenticado');
 
   const nombre = document.getElementById('nombreCliente').value.trim();
@@ -417,7 +400,7 @@ async function guardarPedidoFirebase() {
     estado: 'pendiente'
   };
 
-  await addDoc(collection(db, "pedidos"), pedidoData);
+  await addDoc(collection(firebaseModules.db, "pedidos"), pedidoData);
   console.log("Pedido guardado exitosamente");
 }
 
@@ -430,12 +413,9 @@ function configurarInterfaz() {
   const carritoOverlay = document.getElementById('carritoOverlay');
   const carritoSidebar = document.getElementById('carrito');
   const cerrarCarrito = document.getElementById('cerrarCarrito');
-  const authBtn = document.getElementById('authBtn');
-  const authMobileBtn = document.getElementById('authMobileBtn');
   const vaciarCarritoBtn = document.getElementById('vaciarCarrito');
   const guardarPedidoBtn = document.getElementById('guardarPedido');
 
-  // Menú hamburguesa
   if (hamburger && mobileMenu) {
     hamburger.addEventListener('click', () => {
       hamburger.classList.toggle('active');
@@ -450,7 +430,6 @@ function configurarInterfaz() {
     });
   }
 
-  // Carrito (solo si existe en la página)
   if (paginaActual.tieneCarrito) {
     function toggleCarrito() {
       if (carritoSidebar && carritoOverlay) {
@@ -506,17 +485,14 @@ function configurarInterfaz() {
     }
   }
 
-  // FAQ (solo si existe)
   if (paginaActual.tieneFAQ) {
     configurarFAQ();
   }
 
-  // Formulario de contacto (solo si existe)
   if (paginaActual.tieneFormularioContacto) {
     configurarFormularioContacto();
   }
 
-  // Botones de añadir al carrito (solo si existen productos)
   if (paginaActual.tieneProductos) {
     const addToCartButtons = document.querySelectorAll(".add-to-cart-btn");
     addToCartButtons.forEach(button => {
@@ -526,42 +502,35 @@ function configurarInterfaz() {
       button.onclick = () => window.agregarAlCarrito(producto, precio);
     });
   }
-
-  // Sincronizar botones de auth
-  function syncAuthButtons() {
-    if (authBtn && authMobileBtn) {
-      authMobileBtn.textContent = authBtn.textContent;
-      authMobileBtn.onclick = authBtn.onclick;
-    }
-  }
-
-  setInterval(syncAuthButtons, 100);
 }
 
-// ===== AUTENTICACIÓN LAZY =====
-function configurarAutenticacion() {
+// ===== AUTENTICACIÓN (CARGA DIFERIDA) =====
+async function configurarAutenticacion() {
   const authBtn = document.getElementById('authBtn');
   const authMobileBtn = document.getElementById('authMobileBtn');
   const userWelcome = document.getElementById("userWelcome");
   const userName = document.getElementById("userName");
   const loginMessage = document.getElementById("loginMessage");
 
-  // Solo iniciar listener si la página realmente necesita autenticación
   const necesitaAuth = paginaActual.tieneCarrito || paginaActual.tienePedidos || paginaActual.tieneProductos;
 
   if (!necesitaAuth) {
-    console.log('⏭️ Página no requiere autenticación - omitiendo listener');
-    // Solo configurar botones básicos de login
+    console.log('⏭️ Página no requiere autenticación');
     if (authBtn) authBtn.onclick = () => window.location.href = "auth.html";
     if (authMobileBtn) authMobileBtn.onclick = () => window.location.href = "auth.html";
     return;
   }
 
-  console.log('🔐 Inicializando autenticación...');
+  console.log('🔐 Cargando Firebase y verificando sesión...');
+  await loadFirebase();
+
+  const { onAuthStateChanged, signOut } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+
   authListenerActive = true;
 
-  unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+  unsubscribeAuth = onAuthStateChanged(firebaseModules.auth, async (user) => {
     if (user) {
+      console.log('✅ Usuario autenticado:', user.uid);
       usuarioAutenticado = true;
       currentUserId = user.uid;
       
@@ -574,12 +543,13 @@ function configurarAutenticacion() {
 
       const logoutFunction = async () => {
         try {
-          await signOut(auth);
+          await signOut(firebaseModules.auth);
           carrito = [];
           currentUserId = null;
           mostrarNotificacion("Sesión cerrada correctamente");
+          setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
-          console.error(error);
+          console.error('Error al cerrar sesión:', error);
           mostrarNotificacion("Error al cerrar sesión");
         }
       };
@@ -589,17 +559,16 @@ function configurarAutenticacion() {
 
       if (loginMessage) loginMessage.style.display = "none";
       
-      // Solo cargar carrito si la página lo necesita
       if (paginaActual.tieneCarrito) {
         cargarCarrito();
       }
       
-      // Solo cargar pedidos si estamos en esa página
       if (paginaActual.tienePedidos) {
         const cargarPedidosModule = await import('./cargarPedidos.js');
         await cargarPedidosModule.cargarPedidos(user.uid);
       }
     } else {
+      console.log('❌ Usuario no autenticado');
       usuarioAutenticado = false;
       currentUserId = null;
       carrito = [];
@@ -617,6 +586,24 @@ function configurarAutenticacion() {
 
       if (paginaActual.tieneCarrito) {
         actualizarCarrito();
+      }
+    }
+  });
+
+  firebaseModules.auth.onIdTokenChanged(async (user) => {
+    if (user) {
+      try {
+        await user.getIdToken(true);
+        console.log('✅ Token de autenticación renovado');
+      } catch (error) {
+        console.error('❌ Error renovando token:', error);
+        if (error.code === 'auth/network-request-failed') {
+          mostrarNotificacion('Sesión expirada. Por favor, inicia sesión nuevamente.');
+          setTimeout(() => {
+            firebaseModules.auth.signOut();
+            window.location.href = 'auth.html';
+          }, 3000);
+        }
       }
     }
   });
@@ -643,13 +630,19 @@ function configurarFAQ() {
 }
 
 // ===== FORMULARIO CONTACTO =====
-function configurarFormularioContacto() {
+async function configurarFormularioContacto() {
   const formularioContacto = document.getElementById('formularioContacto');
   
   if (!formularioContacto) return;
 
   formularioContacto.addEventListener('submit', async function(e) {
     e.preventDefault();
+    
+    if (!firebaseModules.loaded) {
+      await loadFirebase();
+    }
+
+    const { addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
     
     const btnEnviar = formularioContacto.querySelector('.btn-enviar');
     const textoOriginal = btnEnviar.textContent;
@@ -658,7 +651,7 @@ function configurarFormularioContacto() {
     btnEnviar.disabled = true;
     
     try {
-      await addDoc(collection(db, "mensajesContacto"), {
+      await addDoc(collection(firebaseModules.db, "mensajesContacto"), {
         nombre: document.getElementById('nombreContacto').value.trim(),
         email: document.getElementById('emailContacto').value.trim(),
         telefono: document.getElementById('telefonoContacto').value.trim(),
@@ -685,25 +678,29 @@ function configurarChatVerificacion() {
   const enviarmensajechat = document.getElementById('enviarMensajeChat');
   
   if (enviarmensajechat) {
-    enviarmensajechat.addEventListener("click", function() {
+    enviarmensajechat.addEventListener("click", async function() {
       if (!usuarioAutenticado) {
         mostrarLoginChat();
         return;
+      }
+      if (!firebaseModules.loaded) {
+        await loadFirebase();
       }
     });
   }
 }
 
 // ===== INICIALIZACIÓN =====
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('Inicializando aplicación optimizada...');
-  console.log('Funcionalidades detectadas:', paginaActual);
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🚀 Inicializando aplicación optimizada...');
+  console.log('📄 Funcionalidades detectadas:', paginaActual);
   
   configurarInterfaz();
-  configurarAutenticacion();
   configurarChatVerificacion();
   
-  console.log('Carrito inicial:', carrito);
+  await configurarAutenticacion();
+  
+  console.log('✅ Aplicación inicializada');
 });
 
 // ===== LIMPIEZA =====
@@ -713,7 +710,6 @@ window.addEventListener('beforeunload', () => {
   }
 });
 
-// Exportar función de limpieza para SPAs
 export function limpiarMain() {
   if (unsubscribeAuth) {
     unsubscribeAuth();
@@ -722,3 +718,5 @@ export function limpiarMain() {
   authListenerActive = false;
   console.log('Main limpiado correctamente');
 }
+
+console.log('✅ main.js cargado - Modo optimizado con carga diferida');
