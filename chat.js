@@ -421,32 +421,77 @@ async function marcarMensajesComoLeidos() {
   }
 }
 
-function actualizarContadorMensajes(cantidad) {
-  const chatBadge = document.getElementById('chatBadge');
+// function actualizarContadorMensajes(cantidad) {
+//   const chatBadge = document.getElementById('chatBadge');
   
-  if (!chatBadge) return;
+//   if (!chatBadge) return;
+  
+//   if (cantidad > 0) {
+//     chatBadge.textContent = cantidad;
+//     chatBadge.style.cssText = `
+//       position: absolute !important;
+//       top: -5px !important;
+//       right: -5px !important;
+//       background: #ef4444 !important;
+//       color: white !important;
+//       width: 24px !important;
+//       height: 24px !important;
+//       border-radius: 50% !important;
+//       display: flex !important;
+//       align-items: center !important;
+//       justify-content: center !important;
+//       font-size: 0.75rem !important;
+//       font-weight: bold !important;
+//       border: 2px solid white !important;
+//       z-index: 9999 !important;
+//     `;
+//   } else {
+//     chatBadge.style.display = 'none';
+//   }
+// }
+function actualizarContadorMensajes(cantidad) {
+  let chatBadge = document.getElementById('chatBadge');
+  const chatToggle = document.getElementById('chatToggle');
+  
+  // Si el badge no existe, crearlo
+  if (!chatBadge && chatToggle) {
+    chatBadge = document.createElement('span');
+    chatBadge.id = 'chatBadge';
+    chatBadge.className = 'chat-badge';
+    chatToggle.style.position = 'relative'; // Asegurar que el padre sea relative
+    chatToggle.appendChild(chatBadge);
+    console.log('✅ Badge creado dinámicamente');
+  }
+  
+  if (!chatBadge) {
+    console.warn('⚠️ No se pudo encontrar o crear chatBadge');
+    return;
+  }
   
   if (cantidad > 0) {
     chatBadge.textContent = cantidad;
-    chatBadge.style.cssText = `
-      position: absolute !important;
-      top: -5px !important;
-      right: -5px !important;
-      background: #ef4444 !important;
-      color: white !important;
-      width: 24px !important;
-      height: 24px !important;
-      border-radius: 50% !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      font-size: 0.75rem !important;
-      font-weight: bold !important;
-      border: 2px solid white !important;
-      z-index: 9999 !important;
-    `;
+    // Usar atributos individuales en lugar de cssText para mejor compatibilidad
+    chatBadge.style.position = 'absolute';
+    chatBadge.style.top = '-5px';
+    chatBadge.style.right = '-5px';
+    chatBadge.style.background = '#ef4444';
+    chatBadge.style.color = 'white';
+    chatBadge.style.width = '24px';
+    chatBadge.style.height = '24px';
+    chatBadge.style.borderRadius = '50%';
+    chatBadge.style.display = 'flex';
+    chatBadge.style.alignItems = 'center';
+    chatBadge.style.justifyContent = 'center';
+    chatBadge.style.fontSize = '0.75rem';
+    chatBadge.style.fontWeight = 'bold';
+    chatBadge.style.border = '2px solid white';
+    chatBadge.style.zIndex = '9999';
+    chatBadge.style.pointerEvents = 'none';
+    
+    console.log(`✅ Badge actualizado: ${cantidad} mensajes no leídos`);
   } else {
     chatBadge.style.display = 'none';
+    console.log('✅ Badge ocultado (0 mensajes)');
   }
 }
 
