@@ -995,15 +995,15 @@
   right: -5px;
   background: #ef4444;
   color: white;
-  border-radius: 50%;
   width: 24px;
   height: 24px;
+  border-radius: 50%;
   font-size: 0.75rem;
-  display: none; /* ← inicialmente oculto */
-  align-items: center;
-  justify-content: center;
   font-weight: bold;
-  border: 2px solid white; /* ← para que se vea mejor */
+  border: 2px solid white;
+  z-index: 9999;
+  pointer-events: none;
+  /* NO poner display aquí, se controla desde JS */
 }
 
 .chat-window {
