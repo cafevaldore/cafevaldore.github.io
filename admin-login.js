@@ -1,5 +1,35 @@
-import { auth } from './firebaseconfig.js';
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+// admin-login.js - OPTIMIZADO con carga diferida
+
+// Variables para módulos de Firebase
+let firebaseModules = {
+  auth: null,
+  loaded: false
+};
+
+// Cargar Firebase solo cuando se necesite
+async function loadFirebaseForAdminLogin() {
+  if (firebaseModules.loaded) {
+    return firebaseModules;
+  }
+
+  console.log('📦 Admin-login: Cargando Firebase...');
+
+  try {
+    const configModule = await import('./firebaseconfig.js');
+    firebaseModules.auth = configModule.auth;
+    
+    const authModule = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    firebaseModules.signInWithEmailAndPassword = authModule.signInWithEmailAndPassword;
+    
+    firebaseModules.loaded = true;
+    console.log('✅ Admin-login: Firebase cargado');
+    
+    return firebaseModules;
+  } catch (error) {
+    console.error('❌ Admin-login: Error cargando Firebase:', error);
+    throw error;
+  }
+}
 
 // Elementos DOM
 const loginForm = document.getElementById('adminLoginForm');
@@ -23,30 +53,27 @@ loginForm.addEventListener('submit', async (e) => {
   const email = emailInput.value.trim();
   const password = passwordInput.value;
 
-  // Validaciones básicas
   if (!email || !password) {
     showError('Por favor completa todos los campos');
     return;
   }
 
-  // Verificar que el email esté en la lista de administradores
   if (!ADMIN_EMAILS.includes(email.toLowerCase())) {
     showError('Este email no tiene permisos de administrador');
     return;
   }
 
-  // Mostrar loading
   setLoading(true);
   hideMessages();
 
   try {
-    // Login con Firebase Auth
-    await signInWithEmailAndPassword(auth, email, password);
+    // Cargar Firebase solo cuando el usuario intenta hacer login
+    await loadFirebaseForAdminLogin();
     
-    // Firebase maneja la sesión automáticamente
+    await firebaseModules.signInWithEmailAndPassword(firebaseModules.auth, email, password);
+    
     showSuccess('✅ Acceso autorizado. Redirigiendo...');
     
-    // Redireccionar
     setTimeout(() => {
       window.location.href = 'admin.html';
     }, 1500);
@@ -119,3 +146,5 @@ window.togglePassword = function() {
 // Limpiar mensajes al escribir
 emailInput.addEventListener('input', hideMessages);
 passwordInput.addEventListener('input', hideMessages);
+
+console.log('✅ admin-login.js cargado - Modo optimizado');

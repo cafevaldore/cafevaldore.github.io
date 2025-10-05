@@ -1,17 +1,43 @@
-import { auth, db } from './firebaseconfig.js';
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword,
-  updateProfile,
-  sendPasswordResetEmail,
-  updatePassword,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+// auth.js - CORREGIDO con persistencia de sesión
+
+let firebaseModules = {
+  auth: null,
+  loaded: false
+};
 
 const errorMsg = document.getElementById('errorMsg');
 const successMsg = document.getElementById('successMsg');
+
+async function loadFirebaseForAuth() {
+  if (firebaseModules.loaded) {
+    return firebaseModules;
+  }
+
+  console.log('📦 Auth: Cargando Firebase...');
+
+  try {
+    const configModule = await import('./firebaseconfig.js');
+    firebaseModules.auth = configModule.auth;
+    
+    const authModule = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    firebaseModules.signInWithEmailAndPassword = authModule.signInWithEmailAndPassword;
+    firebaseModules.createUserWithEmailAndPassword = authModule.createUserWithEmailAndPassword;
+    firebaseModules.updateProfile = authModule.updateProfile;
+    firebaseModules.sendPasswordResetEmail = authModule.sendPasswordResetEmail;
+    firebaseModules.updatePassword = authModule.updatePassword;
+    firebaseModules.reauthenticateWithCredential = authModule.reauthenticateWithCredential;
+    firebaseModules.EmailAuthProvider = authModule.EmailAuthProvider;
+    firebaseModules.onAuthStateChanged = authModule.onAuthStateChanged;
+    
+    firebaseModules.loaded = true;
+    console.log('✅ Auth: Firebase cargado');
+    
+    return firebaseModules;
+  } catch (error) {
+    console.error('❌ Auth: Error cargando Firebase:', error);
+    throw error;
+  }
+}
 
 function showError(message) {
   errorMsg.textContent = message;
@@ -31,19 +57,15 @@ function showSuccess(message) {
   }, 5000);
 }
 
-// Alternar entre formularios
 window.toggleForm = function(formType) {
-  // Remover clase active de todos los formularios
   const forms = document.querySelectorAll('.auth-form');
   forms.forEach(form => form.classList.remove('active'));
   
-  // Agregar clase active al formulario seleccionado
   const targetForm = document.getElementById(formType + 'Form');
   if (targetForm) {
     targetForm.classList.add('active');
   }
   
-  // Ocultar mensajes
   errorMsg.style.display = 'none';
   successMsg.style.display = 'none';
 };
@@ -59,29 +81,40 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
   }
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
-    showSuccess('¡Bienvenido de vuelta! 🎉');
+    await loadFirebaseForAuth();
+    
+    const userCredential = await firebaseModules.signInWithEmailAndPassword(
+      firebaseModules.auth, 
+      email, 
+      password
+    );
+    
+    console.log('✅ Login exitoso:', userCredential.user.uid);
+    showSuccess('¡Bienvenido de vuelta!');
+    
+    // Esperar un poco para asegurar que Firebase persista la sesión
     setTimeout(() => {
+      console.log('🔄 Redirigiendo a index.html...');
       window.location.href = 'index.html';
     }, 1500);
   } catch (error) {
-  console.error('Error en login:', error);
-  switch (error.code) {
-    case 'auth/user-not-found':
-    case 'auth/wrong-password':
-    case 'auth/invalid-credential': // ← AGREGAR ESTO
-      showError('Credenciales incorrectas');
-      break;
-    case 'auth/invalid-email':
-      showError('Correo electrónico inválido');
-      break;
-    case 'auth/too-many-requests':
-      showError('Demasiados intentos. Intenta más tarde');
-      break;
-    default:
-      showError('Error al iniciar sesión');
+    console.error('Error en login:', error);
+    switch (error.code) {
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
+      case 'auth/invalid-credential':
+        showError('Credenciales incorrectas');
+        break;
+      case 'auth/invalid-email':
+        showError('Correo electrónico inválido');
+        break;
+      case 'auth/too-many-requests':
+        showError('Demasiados intentos. Intenta más tarde');
+        break;
+      default:
+        showError('Error al iniciar sesión');
+    }
   }
-}
 });
 
 // REGISTRO
@@ -101,11 +134,20 @@ document.getElementById('registerBtn').addEventListener('click', async () => {
   }
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(userCredential.user, { displayName: name });
+    await loadFirebaseForAuth();
     
-    showSuccess('¡Cuenta creada exitosamente! 🎉');
+    const userCredential = await firebaseModules.createUserWithEmailAndPassword(
+      firebaseModules.auth, 
+      email, 
+      password
+    );
+    await firebaseModules.updateProfile(userCredential.user, { displayName: name });
+    
+    console.log('✅ Registro exitoso:', userCredential.user.uid);
+    showSuccess('¡Cuenta creada exitosamente!');
+    
     setTimeout(() => {
+      console.log('🔄 Redirigiendo a index.html...');
       window.location.href = 'index.html';
     }, 1500);
   } catch (error) {
@@ -136,7 +178,8 @@ document.getElementById('sendResetBtn').addEventListener('click', async () => {
   }
 
   try {
-    await sendPasswordResetEmail(auth, email);
+    await loadFirebaseForAuth();
+    await firebaseModules.sendPasswordResetEmail(firebaseModules.auth, email);
     showSuccess('¡Correo enviado! Revisa tu bandeja de entrada para restablecer tu contraseña.');
     setTimeout(() => {
       toggleForm('login');
@@ -156,7 +199,7 @@ document.getElementById('sendResetBtn').addEventListener('click', async () => {
   }
 });
 
-// CAMBIO DE CONTRASEÑA (para usuarios ya autenticados)
+// CAMBIO DE CONTRASEÑA
 document.getElementById('changePassBtn').addEventListener('click', async () => {
   const currentPassword = document.getElementById('currentPassword').value;
   const newPassword = document.getElementById('newPassword').value;
@@ -177,25 +220,23 @@ document.getElementById('changePassBtn').addEventListener('click', async () => {
     return;
   }
 
-  const user = auth.currentUser;
-  
-  if (!user) {
-    showError('Debes iniciar sesión para cambiar tu contraseña');
-    toggleForm('login');
-    return;
-  }
-
   try {
-    // Reautenticar al usuario
-    const credential = EmailAuthProvider.credential(user.email, currentPassword);
-    await reauthenticateWithCredential(user, credential);
+    await loadFirebaseForAuth();
     
-    // Actualizar la contraseña
-    await updatePassword(user, newPassword);
+    const user = firebaseModules.auth.currentUser;
+    
+    if (!user) {
+      showError('Debes iniciar sesión para cambiar tu contraseña');
+      toggleForm('login');
+      return;
+    }
+
+    const credential = firebaseModules.EmailAuthProvider.credential(user.email, currentPassword);
+    await firebaseModules.reauthenticateWithCredential(user, credential);
+    await firebaseModules.updatePassword(user, newPassword);
     
     showSuccess('¡Contraseña actualizada correctamente!');
     
-    // Limpiar campos
     document.getElementById('currentPassword').value = '';
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmPassword').value = '';
@@ -218,7 +259,6 @@ document.getElementById('changePassBtn').addEventListener('click', async () => {
   }
 });
 
-// Permitir envío con Enter
 document.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     if (document.getElementById('loginForm').classList.contains('active')) {
@@ -233,10 +273,24 @@ document.addEventListener('keypress', (e) => {
   }
 });
 
-// Verificar si el usuario está autenticado y mostrar el formulario adecuado
-onAuthStateChanged(auth, (user) => {
-  if (user && window.location.pathname.endsWith('auth.html')) {
-    // Si el usuario está autenticado y está en la página de auth, mostrar el formulario de cambio de contraseña
-    toggleForm('change');
-  }
+// VERIFICACIÓN DE SESIÓN AL CARGAR LA PÁGINA
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🔍 Verificando sesión activa...');
+  
+  await loadFirebaseForAuth();
+  
+  firebaseModules.onAuthStateChanged(firebaseModules.auth, (user) => {
+    if (user) {
+      console.log('✅ Sesión activa detectada:', user.uid);
+      // Si hay un usuario autenticado y estamos en auth.html, redirigir a index
+      if (window.location.pathname.endsWith('auth.html')) {
+        console.log('🔄 Usuario ya autenticado, redirigiendo a index.html...');
+        window.location.href = 'index.html';
+      }
+    } else {
+      console.log('❌ No hay sesión activa');
+    }
+  });
 });
+
+console.log('✅ auth.js cargado - Modo optimizado con persistencia');

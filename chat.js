@@ -1,18 +1,4 @@
-import { db } from './firebaseconfig.js';
-import { 
-  collection, 
-  getDocs, 
-  addDoc, 
-  doc, 
-  query, 
-  orderBy, 
-  where,
-  Timestamp,
-  onSnapshot,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+// chat.js - OPTIMIZADO con carga diferida total de Firebase
 
 // Variables globales
 let conversacionId = null;
@@ -21,6 +7,55 @@ let mensajesNoLeidos = 0;
 let chatInicializado = false;
 let unsubscribeMensajes = null;
 let unsubscribeAuth = null;
+
+// Variables para módulos de Firebase (carga diferida)
+let firebaseModules = {
+  db: null,
+  auth: null,
+  Timestamp: null,
+  loaded: false
+};
+
+// Cargar Firebase solo cuando se necesite
+async function loadFirebaseForChat() {
+  if (firebaseModules.loaded) {
+    return firebaseModules;
+  }
+
+  console.log('📦 Chat: Cargando Firebase bajo demanda...');
+
+  try {
+    // Cargar configuración
+    const configModule = await import('./firebaseconfig.js');
+    firebaseModules.db = configModule.db;
+    
+    // Cargar Auth
+    const authModule = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    firebaseModules.auth = authModule.getAuth();
+    firebaseModules.onAuthStateChanged = authModule.onAuthStateChanged;
+    
+    // Cargar Firestore
+    const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    firebaseModules.collection = firestoreModule.collection;
+    firebaseModules.getDocs = firestoreModule.getDocs;
+    firebaseModules.addDoc = firestoreModule.addDoc;
+    firebaseModules.doc = firestoreModule.doc;
+    firebaseModules.query = firestoreModule.query;
+    firebaseModules.orderBy = firestoreModule.orderBy;
+    firebaseModules.where = firestoreModule.where;
+    firebaseModules.Timestamp = firestoreModule.Timestamp;
+    firebaseModules.onSnapshot = firestoreModule.onSnapshot;
+    firebaseModules.updateDoc = firestoreModule.updateDoc;
+    
+    firebaseModules.loaded = true;
+    console.log('✅ Chat: Firebase cargado');
+    
+    return firebaseModules;
+  } catch (error) {
+    console.error('❌ Chat: Error cargando Firebase:', error);
+    throw error;
+  }
+}
 
 // Generar ID seguro con Web Crypto API
 function generarIdSeguro() {
@@ -36,43 +71,53 @@ document.addEventListener('DOMContentLoaded', function() {
     chatBadge.style.display = 'none';
   }
   
-  // Inicializar autenticación inmediatamente para el contador
-  inicializarAuthParaContador();
-  
-  // Configurar el botón de toggle
+  // Configurar el botón de toggle (sin cargar Firebase aún)
   const chatToggle = document.getElementById('chatToggle');
   if (chatToggle) {
     chatToggle.addEventListener('click', inicializarChatLazy);
   }
+  
+  // Verificar si hay sesión previa para inicializar el contador
+  const lastUserId = localStorage.getItem('lastUserId');
+  const guestId = localStorage.getItem('guestChatId');
+  
+  if (lastUserId || guestId) {
+    // Solo cargar Firebase para el contador si hay sesión previa
+    inicializarAuthParaContador();
+  }
 });
 
-// Inicializar solo la autenticación y contador, no toda la UI del chat
+// Inicializar solo la autenticación y contador
 async function inicializarAuthParaContador() {
-  const auth = getAuth();
-  
-  unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-    if (user) {
-      // Usuario autenticado
-      usuarioActual = {
-        uid: user.uid,
-        email: user.email
-      };
-      cargarConversacionUsuario(); // Solo para el contador
-    } else {
-      // Usuario invitado
-      let guestId = localStorage.getItem('guestChatId');
-      if (!guestId) {
-        guestId = generarIdSeguro();
-        localStorage.setItem('guestChatId', guestId);
+  try {
+    await loadFirebaseForChat();
+    
+    unsubscribeAuth = firebaseModules.onAuthStateChanged(firebaseModules.auth, (user) => {
+      if (user) {
+        // Usuario autenticado
+        usuarioActual = {
+          uid: user.uid,
+          email: user.email
+        };
+        cargarConversacionUsuario();
+      } else {
+        // Usuario invitado
+        let guestId = localStorage.getItem('guestChatId');
+        if (!guestId) {
+          guestId = generarIdSeguro();
+          localStorage.setItem('guestChatId', guestId);
+        }
+        
+        usuarioActual = {
+          uid: guestId,
+          email: 'invitado@valdore.com'
+        };
+        cargarConversacionUsuario();
       }
-      
-      usuarioActual = {
-        uid: guestId,
-        email: 'invitado@valdore.com'
-      };
-      cargarConversacionUsuario(); // Solo para el contador
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Error inicializando auth para contador:', error);
+  }
 }
 
 // Inicialización lazy - solo cuando el usuario hace clic
@@ -83,7 +128,18 @@ async function inicializarChatLazy() {
     return;
   }
 
-  console.log('Inicializando UI del chat por primera vez...');
+  console.log('🚀 Inicializando UI del chat por primera vez...');
+  
+  // Cargar Firebase si no está cargado
+  if (!firebaseModules.loaded) {
+    await loadFirebaseForChat();
+    
+    // Inicializar auth si no se ha hecho
+    if (!unsubscribeAuth) {
+      await inicializarAuthParaContador();
+    }
+  }
+  
   chatInicializado = true;
 
   // Remover este listener y agregar el normal
@@ -160,14 +216,16 @@ function cerrarChat() {
 }
 
 async function cargarConversacionUsuario() {
+  if (!firebaseModules.loaded) return;
+  
   try {
-    const q = query(
-      collection(db, "conversacionesClientes"),
-      where("usuarioId", "==", usuarioActual.uid),
-      orderBy("fechaUltimoMensaje", "desc")
+    const q = firebaseModules.query(
+      firebaseModules.collection(firebaseModules.db, "conversacionesClientes"),
+      firebaseModules.where("usuarioId", "==", usuarioActual.uid),
+      firebaseModules.orderBy("fechaUltimoMensaje", "desc")
     );
     
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await firebaseModules.getDocs(q);
     
     if (!querySnapshot.empty) {
       const conversacionDoc = querySnapshot.docs[0];
@@ -193,16 +251,18 @@ async function cargarConversacionUsuario() {
 }
 
 function suscribirMensajes(conversacionId) {
+  if (!firebaseModules.loaded) return;
+  
   // Si ya existe una suscripción, cancelarla primero
   if (unsubscribeMensajes) {
     unsubscribeMensajes();
   }
 
-  const mensajesRef = collection(db, "conversacionesClientes", conversacionId, "mensajes");
-  const q = query(mensajesRef, orderBy("fecha", "asc"));
+  const mensajesRef = firebaseModules.collection(firebaseModules.db, "conversacionesClientes", conversacionId, "mensajes");
+  const q = firebaseModules.query(mensajesRef, firebaseModules.orderBy("fecha", "asc"));
   
   // Guardar la función de desuscripción
-  unsubscribeMensajes = onSnapshot(q, (snapshot) => {
+  unsubscribeMensajes = firebaseModules.onSnapshot(q, (snapshot) => {
     // Solo manipular el DOM si el chat está inicializado
     if (chatInicializado) {
       const chatMessages = document.getElementById('chatMessages');
@@ -221,7 +281,7 @@ function suscribirMensajes(conversacionId) {
         agregarMensajeAlChat(mensaje);
       }
       
-      // Siempre contar mensajes no leídos, independientemente del estado del chat
+      // Siempre contar mensajes no leídos
       if (mensaje.remitente === 'admin' && mensaje.leido === false && !chatAbierto) {
         contadorNoLeidos++;
       }
@@ -278,6 +338,11 @@ function agregarMensajeAlChat(mensaje) {
 }
 
 async function enviarMensaje() {
+  if (!firebaseModules.loaded) {
+    console.error('Firebase no está cargado');
+    return;
+  }
+  
   const mensajeInput = document.getElementById('mensajeChat');
   const mensajeTexto = mensajeInput.value.trim();
   
@@ -288,12 +353,15 @@ async function enviarMensaje() {
       const nuevaConversacion = {
         usuarioId: usuarioActual.uid,
         usuarioEmail: usuarioActual.email || 'Cliente invitado',
-        fechaCreacion: Timestamp.now(),
-        fechaUltimoMensaje: Timestamp.now(),
+        fechaCreacion: firebaseModules.Timestamp.now(),
+        fechaUltimoMensaje: firebaseModules.Timestamp.now(),
         estado: 'activa'
       };
       
-      const conversacionRef = await addDoc(collection(db, "conversacionesClientes"), nuevaConversacion);
+      const conversacionRef = await firebaseModules.addDoc(
+        firebaseModules.collection(firebaseModules.db, "conversacionesClientes"), 
+        nuevaConversacion
+      );
       conversacionId = conversacionRef.id;
       suscribirMensajes(conversacionId);
     }
@@ -301,15 +369,19 @@ async function enviarMensaje() {
     const nuevoMensaje = {
       contenido: mensajeTexto,
       remitente: 'cliente',
-      fecha: Timestamp.now(),
+      fecha: firebaseModules.Timestamp.now(),
       leido: true
     };
     
-    await addDoc(collection(db, "conversacionesClientes", conversacionId, "mensajes"), nuevoMensaje);
+    await firebaseModules.addDoc(
+      firebaseModules.collection(firebaseModules.db, "conversacionesClientes", conversacionId, "mensajes"), 
+      nuevoMensaje
+    );
     
-    await updateDoc(doc(db, "conversacionesClientes", conversacionId), {
-      fechaUltimoMensaje: Timestamp.now()
-    });
+    await firebaseModules.updateDoc(
+      firebaseModules.doc(firebaseModules.db, "conversacionesClientes", conversacionId), 
+      { fechaUltimoMensaje: firebaseModules.Timestamp.now() }
+    );
     
     mensajeInput.value = '';
     
@@ -320,22 +392,23 @@ async function enviarMensaje() {
 }
 
 async function marcarMensajesComoLeidos() {
-  if (!conversacionId) return;
+  if (!conversacionId || !firebaseModules.loaded) return;
   
   try {
-    const mensajesRef = collection(db, "conversacionesClientes", conversacionId, "mensajes");
-    const q = query(
+    const mensajesRef = firebaseModules.collection(firebaseModules.db, "conversacionesClientes", conversacionId, "mensajes");
+    const q = firebaseModules.query(
       mensajesRef, 
-      where("remitente", "==", "admin"),
-      where("leido", "==", false)
+      firebaseModules.where("remitente", "==", "admin"),
+      firebaseModules.where("leido", "==", false)
     );
     
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await firebaseModules.getDocs(q);
     
     const actualizaciones = querySnapshot.docs.map(docSnap => 
-      updateDoc(doc(db, "conversacionesClientes", conversacionId, "mensajes", docSnap.id), {
-        leido: true
-      })
+      firebaseModules.updateDoc(
+        firebaseModules.doc(firebaseModules.db, "conversacionesClientes", conversacionId, "mensajes", docSnap.id), 
+        { leido: true }
+      )
     );
     
     await Promise.all(actualizaciones);
@@ -402,7 +475,7 @@ window.addEventListener('beforeunload', () => {
   }
 });
 
-// Función para limpiar recursos manualmente (útil para SPAs)
+// Función para limpiar recursos manualmente
 export function limpiarChat() {
   if (unsubscribeMensajes) {
     unsubscribeMensajes();
@@ -416,5 +489,8 @@ export function limpiarChat() {
   conversacionId = null;
   usuarioActual = null;
   mensajesNoLeidos = 0;
+  firebaseModules.loaded = false;
   console.log('Chat limpiado correctamente');
 }
+
+console.log('✅ chat.js cargado - Modo optimizado con carga diferida');

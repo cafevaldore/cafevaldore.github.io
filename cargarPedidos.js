@@ -1,11 +1,40 @@
-// cargarPedidos.js - Módulo independiente para la página de pedidos
-import { db } from './firebaseconfig.js';
-import { 
-  collection, 
-  getDocs, 
-  query, 
-  where 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+// cargarPedidos.js - OPTIMIZADO con carga diferida
+
+// Variables para módulos de Firebase
+let firebaseModules = {
+  db: null,
+  loaded: false
+};
+
+// Cargar Firebase solo cuando se necesite
+async function loadFirebaseForPedidos() {
+  if (firebaseModules.loaded) {
+    return firebaseModules;
+  }
+
+  console.log('📦 Pedidos: Cargando Firebase...');
+
+  try {
+    // Cargar configuración
+    const configModule = await import('./firebaseconfig.js');
+    firebaseModules.db = configModule.db;
+    
+    // Cargar Firestore
+    const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    firebaseModules.collection = firestoreModule.collection;
+    firebaseModules.getDocs = firestoreModule.getDocs;
+    firebaseModules.query = firestoreModule.query;
+    firebaseModules.where = firestoreModule.where;
+    
+    firebaseModules.loaded = true;
+    console.log('✅ Pedidos: Firebase cargado');
+    
+    return firebaseModules;
+  } catch (error) {
+    console.error('❌ Pedidos: Error cargando Firebase:', error);
+    throw error;
+  }
+}
 
 export async function cargarPedidos(uid) {
   const pedidosContainer = document.getElementById("pedidosContainer");
@@ -20,10 +49,16 @@ export async function cargarPedidos(uid) {
   `;
   
   try {
+    // Cargar Firebase bajo demanda
+    await loadFirebaseForPedidos();
+    
     console.log("Cargando pedidos para usuario:", uid);
     
-    const q = query(collection(db, "pedidos"), where("uid", "==", uid));
-    const querySnapshot = await getDocs(q);
+    const q = firebaseModules.query(
+      firebaseModules.collection(firebaseModules.db, "pedidos"), 
+      firebaseModules.where("uid", "==", uid)
+    );
+    const querySnapshot = await firebaseModules.getDocs(q);
 
     if (querySnapshot.empty) {
       mostrarSinPedidos();
@@ -136,3 +171,5 @@ function mostrarPedidos(pedidos) {
 
   console.log(`Mostrando ${pedidos.length} pedidos`);
 }
+
+console.log('✅ cargarPedidos.js cargado - Modo optimizado');
