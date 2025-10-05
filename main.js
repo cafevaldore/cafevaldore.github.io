@@ -590,23 +590,6 @@ async function configurarAutenticacion() {
     }
   });
 
-  firebaseModules.auth.onIdTokenChanged(async (user) => {
-    if (user) {
-      try {
-        await user.getIdToken(true);
-        console.log('✅ Token de autenticación renovado');
-      } catch (error) {
-        console.error('❌ Error renovando token:', error);
-        if (error.code === 'auth/network-request-failed') {
-          mostrarNotificacion('Sesión expirada. Por favor, inicia sesión nuevamente.');
-          setTimeout(() => {
-            firebaseModules.auth.signOut();
-            window.location.href = 'auth.html';
-          }, 3000);
-        }
-      }
-    }
-  });
 }
 
 // ===== FAQ =====
